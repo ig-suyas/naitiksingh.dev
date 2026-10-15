@@ -18,7 +18,7 @@
   function syncThemeUi() {
     var light = isLight();
     toggle.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
-    if (themeMeta) themeMeta.setAttribute('content', light ? '#f5f5f4' : '#0b0b0d');
+    if (themeMeta) themeMeta.setAttribute('content', light ? '#f2f5f1' : '#050705');
   }
 
   toggle.addEventListener('click', function () {
@@ -111,9 +111,40 @@
   }
 
   /* ------------------------------------------------------------------------
-     Hero background: a slow-moving dot field drawn on canvas.
-     Pauses off-screen and in background tabs; a single static frame
-     is drawn when reduced motion is preferred.
+     Scramble the project names on hover, like text being decoded.
+     ------------------------------------------------------------------------ */
+
+  var GLYPHS = '0123456789abcdef<>/{}[]=+*#$%';
+
+  document.querySelectorAll('[data-scramble]').forEach(function (el) {
+    var original = el.textContent;
+    var timer = 0;
+    function scramble() {
+      if (reduceMotion.matches) return;
+      var frame = 0;
+      var total = 14;
+      clearInterval(timer);
+      timer = setInterval(function () {
+        frame++;
+        var settled = Math.floor((frame / total) * original.length);
+        var out = '';
+        for (var i = 0; i < original.length; i++) {
+          out += i < settled ? original[i] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+        el.textContent = out;
+        if (frame >= total) { clearInterval(timer); el.textContent = original; }
+      }, 32);
+    }
+    var link = el.closest('a');
+    link.addEventListener('mouseenter', scramble);
+    link.addEventListener('focus', scramble);
+  });
+
+  /* ------------------------------------------------------------------------
+     Hero background: a field of hex/binary glyphs that drifts in and out,
+     with slow "rain" streaks down some columns. Glyphs near the cursor light
+     up phosphor green and scramble. Pauses off-screen and in background tabs;
+     a single static frame is drawn when reduced motion is preferred.
      ------------------------------------------------------------------------ */
 
   var hero = document.querySelector('.hero');
@@ -121,83 +152,156 @@
   if (!hero || !canvas || !canvas.getContext) return;
 
   var ctx = canvas.getContext('2d');
-  var SPACING = 26;
+  var CELL_W = 18;
+  var CELL_H = 24;
+  var FONT_PX = 15;
+  var PAD = 8;                 // room around each glyph for the baked-in glow
+  var FRAME_MS = 1000 / 24;    // the field moves slowly, 24fps is plenty
   var dpr = 1;
   var width = 0;
   var height = 0;
   var cols = 0;
   var rows = 0;
-  var dotRgb = '237,237,238';
-  var accentRgb = '255,106,61';
+  var cells = null;            // glyph index per cell
+  var heads = null;            // rain head position per column (in rows), < 0 means idle
+  var speeds = null;
+  var atlas = { dim: null, hot: null };
   var pointer = { x: -9999, y: -9999, active: false };
   var running = false;
   var visible = true;
   var rafId = 0;
+  var lastFrame = 0;
   var start = performance.now();
+
+  // Every glyph is pre-rendered once per colour (with the glow baked in for the
+  // bright set), so each frame is just cheap drawImage calls.
+  function makeAtlas(rgb, glow) {
+    var cw = (CELL_W + PAD * 2) * dpr;
+    var ch = (CELL_H + PAD * 2) * dpr;
+    var c = document.createElement('canvas');
+    c.width = Math.ceil(cw * GLYPHS.length);
+    c.height = Math.ceil(ch);
+    var g = c.getContext('2d');
+    g.font = '600 ' + FONT_PX * dpr + 'px "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = 'rgb(' + rgb + ')';
+    if (glow) {
+      g.shadowColor = 'rgba(' + rgb + ',0.9)';
+      g.shadowBlur = 8 * dpr;
+    }
+    for (var i = 0; i < GLYPHS.length; i++) {
+      g.fillText(GLYPHS[i], cw * i + cw / 2, ch / 2);
+    }
+    return c;
+  }
 
   function readColors() {
     var styles = getComputedStyle(root);
-    dotRgb = styles.getPropertyValue('--dot').trim().split(/\s+/).join(',');
-    accentRgb = styles.getPropertyValue('--dot-accent').trim().split(/\s+/).join(',');
+    function rgb(name) { return styles.getPropertyValue(name).trim().split(/\s+/).join(','); }
+    atlas.dim = makeAtlas(rgb('--glyph'), false);
+    atlas.hot = makeAtlas(rgb('--glyph-hot'), true);
   }
+
+  function randomGlyph() { return (Math.random() * GLYPHS.length) | 0; }
 
   function resize() {
     var rect = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var newDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var dprChanged = newDpr !== dpr;
+    dpr = newDpr;
     width = rect.width;
     height = rect.height;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cols = Math.ceil(width / SPACING) + 1;
-    rows = Math.ceil(height / SPACING) + 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    cols = Math.ceil(width / CELL_W) + 1;
+    rows = Math.ceil(height / CELL_H) + 1;
+    cells = new Uint8Array(cols * rows);
+    for (var i = 0; i < cells.length; i++) cells[i] = randomGlyph();
+    heads = new Float32Array(cols);
+    speeds = new Float32Array(cols);
+    for (var c = 0; c < cols; c++) {
+      heads[c] = Math.random() < 0.25 ? Math.random() * rows : -Math.random() * rows * 2;
+      speeds[c] = 0.12 + Math.random() * 0.25;
+    }
+    if (dprChanged || !atlas.dim) readColors();
   }
 
-  function draw(now) {
+  function drawGlyph(img, index, x, y, alpha) {
+    var sw = (CELL_W + PAD * 2) * dpr;
+    var sh = (CELL_H + PAD * 2) * dpr;
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(img, index * sw, 0, sw, sh, (x - PAD) * dpr, (y - PAD) * dpr, sw, sh);
+  }
+
+  function draw(now, advance) {
     var t = (now - start) / 1000;
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     var px = pointer.x;
     var py = pointer.y;
-    var reach = 160;
+    var reach = 150;
     var reach2 = reach * reach;
+    var i, j;
 
-    for (var j = 0; j < rows; j++) {
-      var y0 = j * SPACING;
-      for (var i = 0; i < cols; i++) {
-        var x0 = i * SPACING;
+    if (advance) {
+      // A few glyphs mutate every frame so the field never looks frozen.
+      var mutations = Math.max(1, (cells.length * 0.012) | 0);
+      for (i = 0; i < mutations; i++) cells[(Math.random() * cells.length) | 0] = randomGlyph();
+      for (i = 0; i < cols; i++) {
+        heads[i] += speeds[i];
+        if (heads[i] > rows + 12) {
+          heads[i] = -Math.random() * rows * 1.5;
+          speeds[i] = 0.12 + Math.random() * 0.25;
+        }
+      }
+    }
+
+    for (i = 0; i < cols; i++) {
+      var x = i * CELL_W;
+      var head = heads[i];
+      for (j = 0; j < rows; j++) {
+        var y = j * CELL_H;
+        var idx = j * cols + i;
         // Layered sine waves stand in for noise: cheap and smooth.
-        var v = Math.sin(x0 * 0.011 + t * 0.5)
-          + Math.sin(y0 * 0.017 - t * 0.35)
-          + Math.sin((x0 + y0) * 0.006 + t * 0.25);
-        var n = (v + 3) / 6; // 0..1
-        var x = x0;
-        var y = y0 + Math.sin(x0 * 0.02 + t * 0.6) * 3;
+        var v = Math.sin(x * 0.011 + t * 0.45)
+          + Math.sin(y * 0.016 - t * 0.3)
+          + Math.sin((x + y) * 0.006 + t * 0.2);
+        var n = (v + 3) / 6;
+        var alpha = n * n * 0.32;
 
-        var r = 0.6 + n * 1.4;
-        var alpha = 0.06 + n * 0.32;
-        var color = dotRgb;
+        // Rain: bright head with a fading tail above it.
+        var hot = 0;
+        var behind = head - j;
+        if (behind >= 0 && behind < 10) hot = (1 - behind / 10) * 0.6;
 
         if (pointer.active) {
-          var dx = x - px;
-          var dy = y - py;
+          var dx = x + CELL_W / 2 - px;
+          var dy = y + CELL_H / 2 - py;
           var d2 = dx * dx + dy * dy;
           if (d2 < reach2) {
             var k = 1 - d2 / reach2;
-            r += k * 1.6;
-            alpha = Math.min(1, alpha + k * 0.6);
-            if (k > 0.25) color = accentRgb;
+            hot = Math.max(hot, k);
+            if (advance && Math.random() < k * 0.25) cells[idx] = randomGlyph();
           }
         }
 
-        ctx.fillStyle = 'rgba(' + color + ',' + alpha.toFixed(3) + ')';
-        ctx.fillRect(x - r / 2, y - r / 2, r, r);
+        if (hot > 0.08) {
+          drawGlyph(atlas.hot, cells[idx], x, y, Math.min(1, 0.15 + hot * 0.95));
+        } else if (alpha > 0.015) {
+          drawGlyph(atlas.dim, cells[idx], x, y, alpha);
+        }
       }
     }
+    ctx.globalAlpha = 1;
   }
 
   function loop(now) {
-    draw(now);
+    if (now - lastFrame >= FRAME_MS) {
+      lastFrame = now;
+      draw(now, true);
+    }
     rafId = requestAnimationFrame(loop);
   }
 
@@ -213,14 +317,21 @@
   }
 
   function renderStatic() {
-    draw(start + 4000);
+    draw(start + 4000, false);
   }
 
   function init() {
-    readColors();
     resize();
     if (reduceMotion.matches) renderStatic();
     else play();
+
+    // Re-render the glyph atlases once the web font is in, so glyphs use JetBrains Mono.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        readColors();
+        if (!running) renderStatic();
+      });
+    }
 
     if ('ResizeObserver' in window) {
       new ResizeObserver(function () {
@@ -259,8 +370,8 @@
 
   // Start after the page has loaded so the canvas never competes with first paint.
   function whenIdle() {
-    if ('requestIdleCallback' in window) requestIdleCallback(init, { timeout: 1500 });
-    else setTimeout(init, 200);
+    if ('requestIdleCallback' in window) requestIdleCallback(init, { timeout: 2000 });
+    else setTimeout(init, 300);
   }
   if (document.readyState === 'complete') whenIdle();
   else window.addEventListener('load', whenIdle);

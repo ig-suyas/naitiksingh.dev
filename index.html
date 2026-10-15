@@ -10,7 +10,7 @@
   <meta name="author" content="Naitik Singh">
 
   <meta name="color-scheme" content="dark light">
-  <meta name="theme-color" content="#0b0b0d">
+  <meta name="theme-color" content="#050705">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -49,8 +49,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Fonts load without blocking first paint; metric-matched fallbacks in styles.css prevent layout shift. -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Geist:wght@400..600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Geist:wght@400..600&amp;display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..800&amp;family=Geist:wght@400..600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..800&amp;family=Geist:wght@400..600&amp;display=swap"></noscript>
   <link rel="stylesheet" href="/assets/styles.css">
   <script src="/assets/main.js" defer></script>
 
@@ -73,8 +73,7 @@
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="brand" href="#top">
-        <span class="brand__mark" aria-hidden="true">N</span>
-        <span class="brand__name">Naitik Singh</span>
+        <span class="brand__prompt" aria-hidden="true">~/</span><span class="brand__name">naitik-singh</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <ul>
@@ -96,8 +95,8 @@
       <canvas class="hero__canvas" aria-hidden="true"></canvas>
       <div class="hero__glow" aria-hidden="true"></div>
       <div class="container hero__inner">
-        <p class="eyebrow hero__eyebrow">Backend &amp; Full-Stack Developer</p>
-        <h1 class="hero__title" id="hero-title">I build, fix, and improve software<span class="accent">.</span></h1>
+        <p class="eyebrow hero__eyebrow"><span class="prompt" aria-hidden="true">$</span> whoami <span class="eyebrow__out">Backend &amp; Full-Stack Developer</span></p>
+        <h1 class="hero__title" id="hero-title">I build, fix, and improve <span class="nowrap">software.<span class="cursor" aria-hidden="true"></span></span></h1>
         <p class="hero__lede">Fixed price, clear scope, fast turnaround. Java/Spring Boot, Node.js, React/Next.js.</p>
         <div class="hero__actions">
           <a class="btn btn--primary" href="mailto:naitiksingh.dev@gmail.com?subject=Project%20inquiry">Email me</a>
@@ -151,14 +150,14 @@
         <h2 class="section__title" id="work-title" data-reveal>Selected work</h2>
         <ul class="work">
           <li class="work__item" data-reveal>
-            <a class="work__link" href="https://shadeon-chi.vercel.app/" target="_blank" rel="noopener noreferrer">
-              <span class="work__word">Shadeon</span><span class="work__arrow" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+            <a class="work__link" href="https://shadeon-chi.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Shadeon (opens in a new tab)">
+              <span class="work__word" data-scramble>Shadeon</span><span class="work__arrow" aria-hidden="true">↗</span>
             </a>
             <p class="work__desc">Animated WebGL shader library with live tuning and export as React, JS, or GLSL.</p>
           </li>
           <li class="work__item work__item--offset" data-reveal>
-            <a class="work__link" href="https://xzie-store-frontend.vercel.app/" target="_blank" rel="noopener noreferrer">
-              <span class="work__word">Haul</span><span class="work__arrow" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+            <a class="work__link" href="https://xzie-store-frontend.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Haul (opens in a new tab)">
+              <span class="work__word" data-scramble>Haul</span><span class="work__arrow" aria-hidden="true">↗</span>
             </a>
             <p class="work__desc">Marketplace for independent makers with a single checkout.</p>
           </li>
