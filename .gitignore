@@ -22,6 +22,3 @@ npm-debug.log*
 # Lighthouse reports
 *.report.html
 *.report.json
-
-# Local Claude Code config
-.claude/
