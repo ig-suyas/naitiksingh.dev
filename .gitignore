@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (if tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Vercel
+.vercel
+
+# Local env
+.env
+.env.*
+
+# Lighthouse reports
+*.report.html
+*.report.json
+
+# Local Claude Code config
+.claude/
