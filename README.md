@@ -53,7 +53,7 @@ vercel --prod # production deployment
 
 ### Custom domain
 
-The canonical URL, Open Graph URLs, `robots.txt` and `sitemap.xml` all assume the site lives at `https://naitiksingh.dev`. If you deploy to a different domain, search and replace `https://naitiksingh.dev` across `index.html`, `robots.txt` and `sitemap.xml`.
+The canonical URL, Open Graph URLs, `robots.txt` and `sitemap.xml` all assume the site lives at `https://naitiksinghdev.vercel.app`. If you deploy to a different domain, search and replace `https://naitiksinghdev.vercel.app` across `index.html`, `robots.txt` and `sitemap.xml`.
 
 ## Editing
 
