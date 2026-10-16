@@ -1,0 +1,216 @@
+/* ==========================================================================
+   Scroll-linked effects (loaded after styles.css).
+   Pure CSS scroll-driven animations: the browser runs them off the main
+   thread, so they cost almost nothing and never hold the page in place.
+   Browsers without support keep the normal fade-in from main.js.
+   ========================================================================== */
+
+.scroll-progress { display: none; }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* The JS fade-in is replaced by the scroll-linked versions below. */
+    .js [data-reveal] { opacity: 1; transform: none; }
+
+    /* ----------------------------------------------------------------------
+       Progress bar along the top
+       ---------------------------------------------------------------------- */
+    .scroll-progress {
+      display: block;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 70;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--glow);
+      transform-origin: 0 50%;
+      pointer-events: none;
+      animation: fx-grow linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* ----------------------------------------------------------------------
+       Hero: content lifts away, the headline glitches and breaks up
+       ---------------------------------------------------------------------- */
+    .hero { view-timeline: --hero block; }
+    .hero__inner {
+      animation: fx-hero-out linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 90%;
+    }
+    .js .hero__inner > .hero__title {
+      animation: rise-solid 0.9s var(--ease) both, fx-glitch linear both;
+      animation-timeline: auto, --hero;
+      animation-range: normal, exit 5% exit 75%;
+    }
+    .hero__canvas {
+      animation: fx-canvas-out linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* ----------------------------------------------------------------------
+       Titles wipe in behind a green scan line
+       ---------------------------------------------------------------------- */
+    .section__title,
+    .contact__title { position: relative; }
+    .section__title,
+    .contact__title,
+    .offer__title {
+      animation: fx-wipe linear backwards;
+      animation-timeline: view();
+      animation-range: entry 20% cover 38%;
+    }
+    .section__title::after,
+    .contact__title::after {
+      content: "";
+      position: absolute;
+      top: -0.1em; bottom: -0.1em;
+      width: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 14px var(--accent), 0 0 30px var(--glow);
+      opacity: 0;
+      animation: fx-scan linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+
+    /* ----------------------------------------------------------------------
+       Service cards tilt up out of the page, alternating sides
+       ---------------------------------------------------------------------- */
+    .service {
+      animation: fx-card-left linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% cover 32%;
+    }
+    .service:nth-child(even) { animation-name: fx-card-right; }
+
+    /* ----------------------------------------------------------------------
+       Process: steps slide in, ticks pop
+       ---------------------------------------------------------------------- */
+    .process__list li {
+      view-timeline: --step block;
+      animation: fx-step linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+    .process__list li::before {
+      display: inline-block;
+      animation: fx-pop linear backwards;
+      animation-timeline: --step;
+      animation-range: entry 60% cover 34%;
+    }
+
+    /* ----------------------------------------------------------------------
+       Work: names fly in from opposite sides, then keep drifting
+       ---------------------------------------------------------------------- */
+    .work__item { view-timeline: --project block; }
+    .work__link {
+      animation: fx-fly-left linear both;
+      animation-timeline: --project;
+      animation-range: entry 0% exit 100%;
+    }
+    .work__item:nth-child(even) .work__link { animation-name: fx-fly-right; }
+    .work__desc {
+      animation: fx-rise linear backwards;
+      animation-timeline: --project;
+      animation-range: entry 30% cover 40%;
+    }
+
+    /* ----------------------------------------------------------------------
+       Offer zooms in while its bar draws; contact actions pop
+       ---------------------------------------------------------------------- */
+    .offer {
+      animation: fx-zoom linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    .offer::before {
+      transform-origin: 50% 0;
+      animation: fx-bar linear backwards;
+      animation-timeline: view();
+      animation-range: entry 20% cover 45%;
+    }
+    .contact__lede,
+    .contact__actions {
+      animation: fx-rise linear backwards;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Keyframes
+   -------------------------------------------------------------------------- */
+
+@keyframes fx-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@keyframes fx-hero-out {
+  to { transform: translateY(-140px) scale(0.96); opacity: 0; }
+}
+
+@keyframes fx-glitch {
+  0% { transform: none; text-shadow: none; clip-path: inset(0); }
+  25% { transform: translateX(6px) skewX(-8deg); text-shadow: -6px 0 var(--accent), 6px 0 var(--accent-dim); }
+  45% { transform: translateX(-5px) skewX(6deg); clip-path: inset(10% 0 30% 0); }
+  65% { transform: translateX(8px); clip-path: inset(40% 0 5% 0); text-shadow: 8px 0 var(--accent), -8px 0 var(--accent-dim); }
+  100% { transform: translateX(-12px) skewX(-10deg); clip-path: inset(48% 0 48% 0); text-shadow: none; }
+}
+
+@keyframes fx-canvas-out { to { opacity: 0.15; transform: scale(1.15); } }
+
+@keyframes fx-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes fx-scan {
+  0% { left: 0; opacity: 1; }
+  85% { left: 100%; opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes fx-card-left {
+  from { opacity: 0; transform: perspective(900px) translate(-60px, 70px) rotateX(24deg) rotateY(-10deg) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fx-card-right {
+  from { opacity: 0; transform: perspective(900px) translate(60px, 70px) rotateX(24deg) rotateY(10deg) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fx-step {
+  from { opacity: 0; transform: translateX(80px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fx-pop {
+  0% { transform: scale(0) rotate(-90deg); }
+  70% { transform: scale(1.5) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes fx-fly-left {
+  0% { opacity: 0; transform: translateX(-35vw) skewX(18deg); }
+  40% { opacity: 1; transform: none; }
+  100% { opacity: 1; transform: translateX(6vw); }
+}
+@keyframes fx-fly-right {
+  0% { opacity: 0; transform: translateX(35vw) skewX(-18deg); }
+  40% { opacity: 1; transform: none; }
+  100% { opacity: 1; transform: translateX(-6vw); }
+}
+
+@keyframes fx-rise {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fx-zoom {
+  from { opacity: 0; transform: scale(0.82); filter: brightness(1.8); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes fx-bar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
