@@ -2,6 +2,7 @@ import { contactAct, credits, person } from "@/content/site";
 import { delay } from "@/lib/reveal";
 import { CopyEmail } from "./CopyEmail";
 import { LazyContactForm } from "./LazyContactForm";
+import { CreditsBlackHole } from "./CreditsBlackHole";
 import { Magnetic } from "@/components/ui/Magnetic";
 
 /** End credits roll, then the brief: "Now showing: your project." */
@@ -14,8 +15,9 @@ export function EndCredits() {
 
   return (
     <section id="contact" data-act aria-labelledby="contact-heading" className="relative">
+      <CreditsBlackHole />
       <div
-        className="cv mx-auto max-w-xl px-5 pt-[30vh] pb-[22vh] text-center"
+        className="cv text-shadow-film credits-legible relative mx-auto max-w-xl px-5 pt-[30vh] pb-[22vh] text-center"
         style={{ "--cis": "2200px" } as React.CSSProperties}
       >
         <p data-reveal className="mono-label text-amber">
@@ -41,7 +43,7 @@ export function EndCredits() {
       <div
         id="brief"
         tabIndex={-1}
-        className="mx-auto grid w-full max-w-[1400px] gap-14 px-5 pt-[8vh] pb-[14vh] outline-none sm:px-10 lg:grid-cols-12 lg:gap-10"
+        className="relative mx-auto grid w-full max-w-[1400px] gap-14 px-5 pt-[8vh] pb-[14vh] outline-none sm:px-10 lg:grid-cols-12 lg:gap-10"
       >
         <div className="lg:col-span-5">
           <p data-reveal style={delay(0)} className="mono-label text-amber">

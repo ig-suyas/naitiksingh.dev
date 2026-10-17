@@ -6,7 +6,8 @@ import { buildMorph, setAt, type SetId } from "@/lib/acts";
 import { subscribe } from "@/lib/director";
 import { clamp, mulberry32, smoothstep } from "@/lib/math";
 
-const LAYERS: SetId[] = ["projector", "system", "screening", "fog", "horizon"];
+// End credits ("credits") have no stage layer: <CreditsBlackHole/> draws the scene.
+const LAYERS: SetId[] = ["projector", "system", "screening", "fog"];
 
 /** Smooth SVG path through points (midpoint quadratic curves). */
 function smoothPath(pts: [number, number][]) {
@@ -221,17 +222,6 @@ export function Fallback2D() {
             <div className="fb-fog a" />
             <div className="fb-fog b" />
             <div className="fb-fog c" />
-          </div>
-        </div>
-      </div>
-
-      {/* End credits: event horizon */}
-      <div ref={setRef("horizon")} className="stage-layer" style={{ opacity: 0 }}>
-        <div className="absolute inset-0">
-          <div className="fb-bh">
-            <div className="fb-disk" />
-            <div className="fb-hole" />
-            <div className="fb-disk front" />
           </div>
         </div>
       </div>

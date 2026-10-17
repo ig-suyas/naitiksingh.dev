@@ -4,7 +4,7 @@
  */
 
 export type Transition = "none" | "flash" | "rack" | "iris" | "fade";
-export type SetId = "projector" | "system" | "screening" | "fog" | "horizon";
+export type SetId = "projector" | "system" | "screening" | "fog" | "credits";
 
 export interface ActDef {
   id: string;
@@ -71,7 +71,7 @@ export const ACTS: readonly ActDef[] = [
     id: "contact",
     slate: "END",
     label: "End credits",
-    set: "horizon",
+    set: "credits",
     transitionIn: "fade",
     letterbox: 0.6,
   },

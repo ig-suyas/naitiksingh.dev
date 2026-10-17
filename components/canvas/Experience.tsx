@@ -12,7 +12,6 @@ import { ProjectorSet } from "./sets/ProjectorSet";
 import { SystemSet } from "./sets/SystemSet";
 import { ScreeningSet } from "./sets/ScreeningSet";
 import { FogSet } from "./sets/FogSet";
-import { HorizonSet } from "./sets/HorizonSet";
 
 export interface ExperienceProps {
   tier: Tier;
@@ -112,7 +111,6 @@ export default function Experience({ tier, onReady, onFail }: ExperienceProps) {
         <SystemSet tier={tier} />
         <ScreeningSet tier={tier} />
         <FogSet tier={tier} />
-        <HorizonSet tier={tier} />
         <CameraRig />
         <Effects tier={tier} />
         <Compile onReady={onReady} />

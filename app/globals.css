@@ -846,44 +846,6 @@ html.has-reticle textarea {
   }
 }
 
-.fb-bh {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 0;
-  height: 0;
-}
-.fb-hole {
-  position: absolute;
-  width: 26vmin;
-  height: 26vmin;
-  margin: -13vmin 0 0 -13vmin;
-  border-radius: 50%;
-  background: #000;
-  box-shadow:
-    0 0 0 1.5px rgb(255 217 160 / 0.9),
-    0 0 26px 6px rgb(232 133 58 / 0.55),
-    0 0 90px 30px rgb(232 133 58 / 0.18);
-}
-.fb-disk {
-  position: absolute;
-  width: 92vmin;
-  height: 15vmin;
-  margin: -7.5vmin 0 0 -46vmin;
-  border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    transparent 30%,
-    rgb(255 217 160 / 0.85) 34%,
-    rgb(232 133 58 / 0.6) 50%,
-    transparent 100%
-  );
-  filter: blur(2px);
-}
-.fb-disk.front {
-  clip-path: inset(50% 0 0 0);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .fb-motes,
   .fb-fogs {
@@ -927,4 +889,28 @@ html.js-reveal [data-reveal].is-in {
 .cv-children > * {
   content-visibility: auto;
   contain-intrinsic-size: auto var(--cis, 1000px);
+}
+
+/* End credits roll over the bright disk of the black hole: a soft shadow
+   local to each line keeps it legible without dimming the hole itself. */
+.credits-legible > p,
+.credits-legible dl > div {
+  position: relative;
+  isolation: isolate;
+}
+.credits-legible > p::before,
+.credits-legible dl > div::before {
+  content: "";
+  position: absolute;
+  inset: -1.25rem -2.75rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(4 4 6 / 0.62), rgb(4 4 6 / 0.3) 55%, transparent);
+}
+.credits-legible dt {
+  color: var(--color-paper);
+  opacity: 0.72;
+  text-shadow:
+    0 0 10px rgb(0 0 0 / 0.95),
+    0 0 2px rgb(0 0 0 / 0.9);
 }
