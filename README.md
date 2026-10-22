@@ -26,7 +26,7 @@ Copy `.env.example` to `.env.local`.
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URL, OG images and sitemap. On Vercel it falls back to `VERCEL_PROJECT_PRODUCTION_URL`, then to `site.fallbackUrl` in `/content/site.ts`. |
 | `RESEND_API_KEY`       | Sends contact-form email. When it is unset, the form falls back to a pre-filled `mailto:`.                                                          |
-| `CONTACT_TO_EMAIL`     | Inbox for enquiries (defaults to the email in `/content/site.ts`).                                                                                  |
+| `CONTACT_TO_EMAIL`     | Inbox for inquiries (defaults to the email in `/content/site.ts`).                                                                                  |
 | `CONTACT_FROM_EMAIL`   | A sender on a domain verified in Resend (defaults to Resend's test sender).                                                                         |
 
 ## Deploy (Vercel)
@@ -79,7 +79,7 @@ What keeps it fast, so future changes don't undo it:
 - [ ] **Location and timezone (optional):** `person.location`, `person.timezone`.
 - [x] **Pricing:** current budget brackets kept.
 - [ ] **Support window:** its length (FAQ "What happens after launch?").
-- [ ] **Response time:** the promise in `contactAct.sub` ("within one working day").
+- [ ] **Response time:** the promise in `contactAct.sub` ("within one business day").
 - [ ] **GraphQL tier:** confirm it in `skills`.
 - [x] **Email delivery:** the mailto fallback is the chosen setup; add `RESEND_API_KEY` later only if you want direct sends.
 - [ ] **Testimonials:** add real ones when you have them. Never invent any.

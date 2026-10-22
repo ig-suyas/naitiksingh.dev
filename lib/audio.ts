@@ -1,5 +1,5 @@
 /**
- * Projector ambience synthesised with Web Audio: no files, no autoplay.
+ * Projector ambience synthesized with Web Audio: no files, no autoplay.
  * A band-passed noise "whir" amplitude-modulated at 24 Hz (the shutter),
  * a low mains hum, and a short mechanical clack on every cut.
  */

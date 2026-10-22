@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { contactAct, person } from "@/content/site";
+import { CopyEmail } from "./CopyEmail";
 
 /** Same footprint as the form, so nothing shifts when it arrives. */
 function Placeholder() {
@@ -16,13 +17,13 @@ function Placeholder() {
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="border-paper/10 bg-ink/40 h-[74px] rounded-[10px] border" />
         ))}
-        <p className="text-dim text-sm">
-          Loading the form… or write to{" "}
+        <div className="text-dim flex flex-wrap items-center gap-3 text-sm">
+          <span>Prefer email? Write to</span>
           <a href={`mailto:${person.email}`} className="text-paper/80 underline underline-offset-4">
             {person.email}
           </a>
-          .
-        </p>
+          <CopyEmail />
+        </div>
       </div>
     </div>
   );

@@ -52,6 +52,10 @@ export interface Project {
 
 export interface Service {
   title: string;
+  /** e.g. "Starting at $1,500". */
+  price: string;
+  /** Duration or billing terms, shown next to the price. */
+  terms: string;
   pitch: string;
   deliverables: string[];
 }
@@ -86,15 +90,16 @@ export const person: Person = {
   name: "Naitik Singh",
   firstName: "Naitik",
   role: "Full-stack software engineer",
-  subtitle: "Full-stack engineer. Software that ships.",
-  tagline: "A film about your product, shipped for real.",
+  subtitle:
+    "I build and fix Spring Boot backends for US startups: marketplaces, auth, payments, APIs.",
+  tagline: "Software that ships.",
   bio: [
     "I'm Naitik, a self-taught full-stack engineer who learned by shipping. My home turf is the backend: Java, Spring Boot and Postgres, written carefully and tested properly.",
     "I care just as much about the part people see, which is why my side projects end up as WebGL shader libraries. I take on a small number of freelance projects at a time, so each one gets my full attention from first call to launch.",
   ],
   email: "naitiksingh.dev@gmail.com",
   github: "https://github.com/ig-suyas",
-  linkedin: "", // [CONFIRM] add your LinkedIn URL; hidden while empty
+  linkedin: "https://www.linkedin.com/in/naitik-singh-b29ab1444/",
   otherSocials: [], // [CONFIRM] e.g. { label: "X", href: "https://x.com/…" }
   location: "", // [CONFIRM] city/country; hidden while empty
   timezone: "", // [CONFIRM] e.g. "IST (UTC+5:30)"; hidden while empty
@@ -145,7 +150,7 @@ export const problemAct = {
 export const buildAct = {
   slate: "Act II",
   title: "The Build",
-  heading: "Then the cut comes together.",
+  heading: "Then the system comes together.",
   body: "I design the system first, then build every layer of it: the interface, the APIs, the data and the pipeline that ships it.",
   close: "Clean boundaries. Typed contracts. Tested paths. Deployed on every push.",
 };
@@ -225,7 +230,7 @@ export const architecture = {
 export const proofAct = {
   slate: "Act III",
   title: "The Proof",
-  heading: "Now screening.",
+  heading: "Selected work.",
   sub: "Two features, both live. Each one built, deployed and maintained solo.",
 };
 
@@ -242,7 +247,7 @@ export const projects: Project[] = [
     problem:
       "Shader backgrounds look incredible, but they usually ship with a heavy runtime, a dependency chain and a page that makes laptop fans spin.",
     solution:
-      "A gallery where every shader is tuned live (colours, speed, scale, seed), then exported as one self-contained React component, plain JavaScript or raw GLSL.",
+      "A gallery where every shader is tuned live (colors, speed, scale, seed), then exported as one self-contained React component, plain JavaScript or raw GLSL.",
     outcomes: [
       "Zero-dependency exports: every shader is a single file, also installable through the shadcn CLI.",
       "One WebGL context draws the whole gallery. Shaders pause off-screen and lower their resolution when frames drop.",
@@ -316,51 +321,43 @@ export const projects: Project[] = [
 
 export const crewAct = {
   slate: "Act IV",
-  title: "The Crew",
-  heading: "Call sheet.",
-  sub: "What you can hire me for, in plain terms.",
+  title: "Services",
+  heading: "Services & pricing.",
+  sub: "Three fixed-price ways to work together.",
 };
 
 export const services: Service[] = [
   {
-    title: "Full-stack web apps & SaaS MVPs",
-    pitch: "From idea to a product people can sign up for and pay for.",
-    deliverables: ["Auth & accounts", "Dashboards", "Data model", "Deployed & monitored"],
+    title: "Backend audit + fix plan",
+    price: "Starting at $1,500",
+    terms: "1 week",
+    pitch:
+      "A written review of your backend: what's slow, what's risky and a prioritized plan to fix it.",
+    deliverables: ["API & auth review", "Query tuning", "Security check", "Prioritized fix plan"],
   },
   {
-    title: "Backend APIs & microservices",
-    pitch: "Java and Spring Boot services with clean contracts, real security and room to grow.",
-    deliverables: ["REST / GraphQL", "Spring Security", "Postgres", "Docker"],
+    title: "MVP backend: marketplace / SaaS API",
+    price: "Starting at $6,000",
+    terms: "4–6 weeks · billed in milestones (30/30/40)",
+    pitch:
+      "A Spring Boot API you can launch on: accounts, roles, payments and a clean data model, deployed.",
+    deliverables: ["Auth & roles", "Payments", "Postgres data model", "Deployed & documented"],
   },
   {
-    title: "Marketplaces, e-commerce & checkout",
-    pitch: "Catalogs, carts, multi-seller orders and the admin tools to run them.",
-    deliverables: ["Multi-vendor", "Order lifecycle", "Roles & permissions", "Payments-ready"],
-  },
-  {
-    title: "Interactive 3D & WebGL sites",
-    pitch: "Launch pages that make people stop scrolling, and still load fast on a phone.",
-    deliverables: ["Three.js / R3F", "Custom shaders", "Scroll stories", "2D fallbacks"],
-  },
-  {
-    title: "Performance, security & code audits",
-    pitch: "A clear written report on what's slow, what's risky and what to fix first.",
-    deliverables: [
-      "Lighthouse & Web Vitals",
-      "API & auth review",
-      "Query tuning",
-      "Prioritised fixes",
-    ],
-  },
-  {
-    title: "Maintenance & feature retainers",
+    title: "Monthly retainer: maintenance and features",
+    price: "Starting at $1,500/mo",
+    terms: "Month to month",
     pitch: "A steady pair of hands each month for fixes, upgrades and new features.",
-    deliverables: ["Monthly hours", "Dependency upgrades", "Bug triage", "Small features"],
+    deliverables: ["Bug fixes", "Dependency upgrades", "New features", "Monitoring"],
   },
 ];
 
+/** One line under the offers: the 3D work, as a side skill. */
+export const servicesNote =
+  "Also available: interactive 3D and WebGL sites, like the shader work in Shadeon.";
+
 export const skillsIntro = {
-  title: "Equipment rack",
+  title: "Skills",
   sub: "Mostly self-taught and hands-on: every tool here has been learned by building something with it.",
   tiers: {
     Core: "Use it daily. Ship with it confidently.",
@@ -430,15 +427,15 @@ export const skills: SkillGroup[] = [
       { name: "Auth: JWT / OAuth2", tier: "Core" },
       { name: "API design", tier: "Core" },
       { name: "Testing: JUnit, Vitest, Playwright", tier: "Comfortable" },
-      { name: "Performance optimisation", tier: "Comfortable" },
+      { name: "Performance optimization", tier: "Comfortable" },
       { name: "Clean architecture", tier: "Comfortable" },
     ],
   },
 ];
 
 export const scheduleIntro = {
-  title: "Production schedule",
-  sub: "How a project runs, from the first call to opening night.",
+  title: "How a project runs",
+  sub: "From the first call to launch.",
 };
 
 export const schedule: Stage[] = [
@@ -450,32 +447,32 @@ export const schedule: Stage[] = [
   },
   {
     reel: "02",
-    title: "Pre-production",
-    film: "Design & architecture",
+    title: "Design & architecture",
+    film: "Pre-production",
     body: "Data model, system design and UI direction are agreed before a line of production code is written.",
   },
   {
     reel: "03",
-    title: "Principal photography",
-    film: "The build",
+    title: "The build",
+    film: "Principal photography",
     body: "Built in short cuts. Every milestone lands on a live preview link you can click through yourself.",
   },
   {
     reel: "04",
-    title: "Post-production",
-    film: "Testing & hardening",
+    title: "Testing & hardening",
+    film: "Post-production",
     body: "Automated tests, performance passes, security hardening and accessibility checks.",
   },
   {
     reel: "05",
-    title: "Premiere",
-    film: "Launch & support",
+    title: "Launch & support",
+    film: "Premiere",
     body: "Launch, monitoring and a support window, then a clean handover: docs, repository and credentials.",
   },
 ];
 
 export const directorsNote = {
-  title: "Director's note",
+  title: "About me",
 };
 
 export const faqIntro = {
@@ -517,8 +514,8 @@ export const pressAct = {
   slate: "Act V",
   title: "Press",
   /** Shown when there are no testimonials yet. Set to "" to hide the act. */
-  reserved: "Reserved for your review.",
-  reservedSub: "The first client reviews will go here. This seat is still open.",
+  reserved: "",
+  reservedSub: "",
 };
 
 /** [CONFIRM] Real testimonials only. Never invent these. */
@@ -539,19 +536,17 @@ export const credits: { role: string; names: string[] }[] = [
 export const contactAct = {
   slate: "End credits",
   nowShowing: "Now showing",
-  heading: "Your project.",
-  sub: "Tell me what you're building. I reply to every enquiry within one working day.", // [CONFIRM] response time
+  heading: "Start a project.",
+  sub: "Tell me what you're building. I reply to every inquiry within one business day.", // [CONFIRM] response time
   formTitle: "Project brief",
   fin: "Fin.",
 };
 
 export const projectTypes = [
-  "Full-stack web app / SaaS MVP",
-  "Backend API / microservices",
-  "Marketplace / e-commerce",
+  "Backend audit + fix plan",
+  "MVP backend: marketplace / SaaS API",
+  "Monthly retainer",
   "Interactive 3D / WebGL site",
-  "Performance / security audit",
-  "Maintenance retainer",
   "Something else",
 ] as const;
 

@@ -29,9 +29,9 @@ export interface BlackHoleProps {
   intensity?: number;
   /** View elevation above the disk, in degrees (2 to 30). */
   tilt?: number;
-  /** Horizontal offset of the hole from the frame centre (-0.5 to 0.5). */
+  /** Horizontal offset of the hole from the frame center (-0.5 to 0.5). */
   x?: number;
-  /** Vertical offset of the hole from the frame centre (-0.5 to 0.5). */
+  /** Vertical offset of the hole from the frame center (-0.5 to 0.5). */
   y?: number;
   seed?: number;
   /** Space, outer disk, middle disk, core. */
@@ -230,7 +230,7 @@ void main() {
   mapped = mix(mapped, u_color4 * (1.0 - exp(-peak * 1.25)), smoothstep(0.5, 3.5, peak) * 0.65);
 
   // Premultiplied output over a transparent page: light covers in proportion
-  // to its brightness, the shadow covers fully. A non-black space colour
+  // to its brightness, the shadow covers fully. A non-black space color
   // makes the whole frame opaque, as in the original.
   vec3 c = clamp(dither(mapped), 0.0, 1.0);
   float space = step(0.002, max(max(u_color1.r, u_color1.g), u_color1.b));

@@ -45,11 +45,11 @@ export function ColdOpen() {
               <span className="bg-amber size-1 rounded-full" />
               <span className="bg-amber/60 h-px w-10 sm:w-16" />
             </div>
-            <p className="text-shadow-film text-paper/90 mt-6 max-w-[34ch] text-lg sm:text-xl">
+            <p className="text-shadow-film text-paper/90 mt-6 max-w-[46ch] text-lg sm:text-xl">
               {person.subtitle}
             </p>
             <p className="text-shadow-film font-display text-amber mt-3 max-w-[36ch] text-lg italic sm:text-2xl">
-              &ldquo;{person.tagline}&rdquo;
+              {person.tagline}
             </p>
           </div>
         </div>

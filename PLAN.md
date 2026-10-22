@@ -22,7 +22,7 @@ Naitik wrote the Haul backend and database by hand, without AI, as a fundamental
 
 ## Acts
 
-The ordered list of acts and their timings lives in `lib/acts.ts`. Act time `T = index + local progress`. Progress is measured against the viewport's centre line.
+The ordered list of acts and their timings lives in `lib/acts.ts`. Act time `T = index + local progress`. Progress is measured against the viewport's center line.
 
 | T | Section id | Set (3D) | Transition out |
 |---|---|---|---|

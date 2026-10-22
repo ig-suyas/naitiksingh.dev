@@ -71,7 +71,16 @@ export default async function OpengraphImage() {
           <div style={{ width: 6, height: 6, borderRadius: 6, background: "#e8a84b" }} />
           <div style={{ width: 70, height: 1, background: "rgba(232,168,75,0.7)" }} />
         </div>
-        <div style={{ fontFamily: "SerifItalic", fontSize: 38, color: "#e8a84b", marginTop: 26 }}>
+        <div
+          style={{
+            fontFamily: "SerifItalic",
+            fontSize: 38,
+            color: "#e8a84b",
+            marginTop: 26,
+            maxWidth: 980,
+            textAlign: "center",
+          }}
+        >
           {person.subtitle}
         </div>
       </div>

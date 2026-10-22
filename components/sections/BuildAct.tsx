@@ -36,7 +36,7 @@ export function BuildAct() {
       const m = Math.round((d.reducedMotion ? (d.T >= 2 ? 1 : 0) : buildMorph(d.T)) * 100);
       if (m === last) return;
       last = m;
-      if (meterRef.current) meterRef.current.textContent = `${String(m).padStart(3, "0")}%`;
+      if (meterRef.current) meterRef.current.textContent = `${m}%`;
       if (barRef.current) barRef.current.style.transform = `scaleX(${m / 100})`;
       if (statusRef.current) {
         statusRef.current.textContent =
@@ -89,12 +89,12 @@ export function BuildAct() {
                 className="text-amber data-[state=online]:text-teal"
               >
                 Standing by
-              </span>
+              </span>{" "}
               <span className="bg-paper/15 relative h-px w-24 overflow-hidden">
                 <span ref={barRef} className="bg-amber absolute inset-0 origin-left scale-x-0" />
-              </span>
-              <span ref={meterRef} className="text-paper tabular-nums">
-                000%
+              </span>{" "}
+              <span ref={meterRef} className="text-paper w-[4ch] text-right tabular-nums">
+                0%
               </span>
             </div>
             <p

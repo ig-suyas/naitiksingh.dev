@@ -24,7 +24,7 @@ export function Footer() {
           </a>
         </p>
         <a href="#title" className="mono-label text-muted hover:text-paper">
-          Rewind ↑
+          Back to top ↑
         </a>
       </div>
     </footer>

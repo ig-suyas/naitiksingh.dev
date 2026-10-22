@@ -174,7 +174,7 @@ export function ContactForm() {
               </p>
               <p className="text-paper/80 mt-5 max-w-[42ch]">
                 Thanks. I&rsquo;ll read it properly and reply to{" "}
-                <span className="text-paper">{sentTo}</span> within one working day.
+                <span className="text-paper">{sentTo}</span> within one business day.
               </p>
               <button
                 type="button"
@@ -256,7 +256,7 @@ export function ContactForm() {
               </div>
               <Field
                 id="message"
-                label="The plot"
+                label="Project details"
                 error={errors.message}
                 hint="What are you building, who is it for, and what does success look like?"
               >
@@ -290,7 +290,7 @@ export function ContactForm() {
                           className="border-ink/30 border-t-ink size-3 animate-spin rounded-full border"
                           aria-hidden="true"
                         />
-                        Rolling…
+                        Sending…
                       </>
                     ) : (
                       "Send the brief"

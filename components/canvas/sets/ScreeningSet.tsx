@@ -50,7 +50,7 @@ function focus(i: number, portrait: boolean, fit: number, out: { pos: Vector3; l
     return;
   }
   // Text panel sits on the opposite side: push the screen into its half of the frame.
-  // Screen centre ~13° off-axis, filling the free half of the frame.
+  // Screen center ~13° off-axis, filling the free half of the frame.
   const side = s.pos.x < 0 ? 1 : -1;
   out.pos.set(s.pos.x + side * 2.1, s.pos.y + 0.2, s.pos.z + 9.1 * fit);
   out.look.set(s.pos.x + side * 2.1, s.pos.y - 0.05, s.pos.z);
@@ -256,7 +256,7 @@ export function ScreeningSet({ tier }: { tier: Tier }) {
       const z = 7 - r * 1.3;
       const y = -2.15 + (z + 9) * 0.05;
       for (let x = -6.6; x <= 6.6; x += step) {
-        if (Math.abs(x) < 0.45) continue; // centre aisle
+        if (Math.abs(x) < 0.45) continue; // center aisle
         const m = new Matrix4().makeRotationY((rand() - 0.5) * 0.06);
         m.setPosition(x + (rand() - 0.5) * 0.04, y, z);
         mats.push(m);

@@ -122,7 +122,7 @@ export function update(time: number) {
   const max = scrollMax;
   director.progress = clamp(scroll / max);
 
-  // Act time: measured against the viewport's centre line.
+  // Act time: measured against the viewport's center line.
   const ref = scroll + vh * 0.5;
   let T = 0;
   const n = sectionTops.length;
@@ -136,12 +136,12 @@ export function update(time: number) {
         break;
       }
     }
-    // The first act starts at the very top of the page, not at the centre line,
+    // The first act starts at the very top of the page, not at the center line,
     // so T = 0 exactly at scroll 0.
     if (n > 1 && ref < sectionTops[1]!) {
       T = clamp(scroll / Math.max(1, sectionTops[1]! - vh * 0.5), 0, 0.9999);
     }
-    // The page bottom can never bring the last act's centre line to its end;
+    // The page bottom can never bring the last act's center line to its end;
     // stretch the final viewport of scroll so T reaches n at the very bottom.
     const lastTop = sectionTops[n - 1]!;
     if (ref > lastTop) {

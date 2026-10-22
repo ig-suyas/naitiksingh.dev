@@ -65,9 +65,6 @@ function Feature({ project: p, index }: { project: Project; index: number }) {
               >
                 {p.logline}
               </p>
-              <p data-reveal style={delay(180)} className="mono-label text-muted mt-5">
-                &ldquo;{p.genre}&rdquo;
-              </p>
 
               <dl className="border-paper/10 mt-8 grid gap-5 border-t pt-6 text-[0.95rem] leading-relaxed">
                 <div data-reveal style={delay(240)}>
@@ -123,7 +120,7 @@ function Feature({ project: p, index }: { project: Project; index: number }) {
                     data-cursor="Watch"
                     className="mono-label bg-paper text-ink hover:bg-amber flex h-11 items-center gap-2 rounded-full px-5 transition-colors"
                   >
-                    Watch the live site <Arrow />
+                    View live site <Arrow />
                     <span className="sr-only"> (opens {p.title} in a new tab)</span>
                   </a>
                 </Magnetic>

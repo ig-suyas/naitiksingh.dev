@@ -7,6 +7,7 @@ import {
   schedule,
   scheduleIntro,
   services,
+  servicesNote,
   skills,
   skillsIntro,
   type Tier,
@@ -70,9 +71,9 @@ export function CrewAct() {
               aria-hidden="true"
             >
               <span className="col-span-1">No.</span>
-              <span className="col-span-4">Department</span>
-              <span className="col-span-4">The scene</span>
-              <span className="col-span-3">On set</span>
+              <span className="col-span-4">Offer</span>
+              <span className="col-span-4">What you get</span>
+              <span className="col-span-3">Includes</span>
             </div>
             <ol>
               {services.map((s, i) => (
@@ -82,9 +83,13 @@ export function CrewAct() {
                   className="group border-paper/10 hover:bg-paper/[0.025] grid grid-cols-1 gap-3 border-b py-7 transition-colors lg:grid-cols-12 lg:gap-6"
                 >
                   <span className="mono-label text-amber lg:col-span-1 lg:pt-2">0{i + 1}</span>
-                  <h3 className="font-display text-2xl leading-tight sm:text-3xl lg:col-span-4">
-                    {s.title}
-                  </h3>
+                  <div className="lg:col-span-4">
+                    <h3 className="font-display text-2xl leading-tight sm:text-3xl">{s.title}</h3>
+                    <p className="mono-label mt-3">
+                      <span className="text-amber">{s.price}</span>
+                      <span className="text-muted"> · {s.terms}</span>
+                    </p>
+                  </div>
                   <p className="text-paper/80 lg:col-span-4 lg:pt-1.5">{s.pitch}</p>
                   <ul
                     className="flex flex-wrap gap-1.5 lg:col-span-3 lg:pt-1"
@@ -99,10 +104,13 @@ export function CrewAct() {
                 </li>
               ))}
             </ol>
+            <p data-reveal className="text-paper/70 mt-8">
+              {servicesNote}
+            </p>
           </div>
         </div>
 
-        {/* Director's note */}
+        {/* About me */}
         <div className="grid gap-10 lg:grid-cols-12">
           <div data-reveal className="lg:col-span-4">
             <p className="mono-label text-amber">{directorsNote.title}</p>
