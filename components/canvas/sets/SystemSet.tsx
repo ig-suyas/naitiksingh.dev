@@ -11,6 +11,8 @@ import {
   Euler,
   InstancedBufferAttribute,
   InstancedBufferGeometry,
+  MathUtils,
+  PerspectiveCamera,
   PlaneGeometry,
   Quaternion,
   ShaderMaterial,
@@ -23,7 +25,18 @@ import { architecture } from "@/content/site";
 import { buildMorph } from "@/lib/acts";
 import { director, type Tier } from "@/lib/director";
 import { clamp, easeInOutCubic, easeOutBack, lerp, mulberry32, smoothstep } from "@/lib/math";
-import { labelEls, type RigFn } from "../registry";
+import {
+  archFrame,
+  ARCH_GROW,
+  LABEL_SIDE,
+  LABEL_SPACING,
+  LABEL_GAP,
+  labelCol,
+  labelEls,
+  labelHeights,
+  leaderEls,
+  type RigFn,
+} from "../registry";
 import { useSet } from "../useSet";
 import { Dust } from "../parts/Dust";
 
@@ -365,6 +378,106 @@ function floorMaterial() {
 
 const UP = new Vector3(0, 1, 0);
 const right = new Vector3();
+
+/** Corners of the assembled architecture's bounding box. */
+/** Each block's assembled corners, for projecting its screen rect. */
+const NODE_CORNERS = NODES.map((n) => {
+  const out: Vector3[] = [];
+  for (const sx of [-0.5, 0.5])
+    for (const sy of [-0.5, 0.5])
+      for (const sz of [-0.5, 0.5])
+        out.push(
+          new Vector3(
+            n.pos[0] + sx * n.size[0],
+            n.pos[1] + sy * n.size[1],
+            n.pos[2] + sz * n.size[2],
+          ),
+        );
+  return out;
+});
+/** The diagram's real outline: every block corner (its axis-aligned box overstates it). */
+const OUTLINE = NODE_CORNERS.flat();
+
+const probe = new PerspectiveCamera();
+const pv = new Vector3();
+const fwd = new Vector3();
+const camUp = new Vector3();
+const off = new Vector3();
+const fitted = { pos: new Vector3(), look: new Vector3() };
+const rect = { l: 0, t: 0, r: 0, b: 0 };
+
+/** Screen rect (px) of the given world points for a camera at pos → look. */
+function project(
+  points: Vector3[],
+  cam: PerspectiveCamera,
+  vw: number,
+  vh: number,
+  out = rect,
+  offset?: Vector3,
+) {
+  out.l = out.t = Infinity;
+  out.r = out.b = -Infinity;
+  for (const p of points) {
+    pv.copy(p);
+    if (offset) pv.add(offset);
+    pv.project(cam);
+    const x = (pv.x * 0.5 + 0.5) * vw;
+    const y = (-pv.y * 0.5 + 0.5) * vh;
+    out.l = Math.min(out.l, x);
+    out.r = Math.max(out.r, x);
+    out.t = Math.min(out.t, y);
+    out.b = Math.max(out.b, y);
+  }
+  return out;
+}
+
+/**
+ * Frames the assembled system inside BuildAct's clear space, leaving room for
+ * the label columns: dolly in until its blocks fill the space (at most
+ * ARCH_GROW past the rig's own shot), then slide the camera parallel to the
+ * image plane until the system is centred.
+ */
+function fitToFrame(pos: Vector3, look: Vector3, fov: number, vw: number, vh: number) {
+  const f = archFrame;
+  const x0 = f.left + (f.columns ? labelCol(vw, "left") + LABEL_GAP : 0);
+  const x1 = f.right - (f.columns ? labelCol(vw, "right") + LABEL_GAP : 0);
+  const tanH = Math.tan(MathUtils.degToRad(fov / 2));
+  probe.fov = fov;
+  probe.aspect = vw / vh;
+  probe.updateProjectionMatrix();
+  // The system may grow at most ARCH_GROW past the rig's own shot.
+  const minDist = pos.distanceTo(look) / ARCH_GROW;
+  // Centre and scale in turn: perspective shifts one when the other changes.
+  for (let k = 0; k < 7; k++) {
+    probe.position.copy(pos);
+    probe.lookAt(look);
+    probe.updateMatrixWorld();
+    const r = project(OUTLINE, probe, vw, vh);
+    if (k % 2 === 1) {
+      const s = Math.max(
+        (r.r - r.l) / Math.max(1, x1 - x0),
+        (r.b - r.t) / Math.max(1, f.bottom - f.top),
+      );
+      off.subVectors(pos, look);
+      const d = Math.max(off.length() * s, minDist);
+      pos.copy(look).addScaledVector(off, d / off.length());
+      continue;
+    }
+    const wpp = (2 * pos.distanceTo(look) * tanH) / vh;
+    fwd.subVectors(look, pos).normalize();
+    right.crossVectors(fwd, UP).normalize();
+    camUp.crossVectors(right, fwd);
+    const dx = (x0 + x1) / 2 - (r.l + r.r) / 2;
+    const dy = (f.top + f.bottom) / 2 - (r.t + r.b) / 2;
+    off
+      .copy(right)
+      .multiplyScalar(-dx * wpp)
+      .addScaledVector(camUp, dy * wpp);
+    pos.add(off);
+    look.add(off);
+  }
+}
+
 const rig: RigFn = (t, shot, aspect, rm) => {
   const portrait = aspect < 1;
   const fit = portrait ? clamp(1.55 / aspect, 1, 2.5) : aspect < 1.35 ? 1.18 : 1;
@@ -391,6 +504,12 @@ const rig: RigFn = (t, shot, aspect, rm) => {
   R *= fit;
   shot.pos.set(Math.sin(theta) * R, h, Math.cos(theta) * R);
   shot.look.set(0, lookY, 0);
+  // Act II frames the system into the space the copy leaves free.
+  const w = archFrame.ready ? smoothstep(0.8, 1, local) : 0;
+  if (w > 0) {
+    fitted.pos.copy(shot.pos);
+    fitted.look.copy(shot.look);
+  }
   if (!portrait) {
     // Frame the system to the right of the pinned copy.
     right.subVectors(shot.look, shot.pos).cross(UP).normalize();
@@ -402,10 +521,117 @@ const rig: RigFn = (t, shot, aspect, rm) => {
     shot.pos.y += 2.6;
     shot.look.y += 2.6;
   }
+  if (w > 0) {
+    const { vw, vh } = director;
+    fitToFrame(fitted.pos, fitted.look, 38, vw, vh);
+    shot.pos.lerp(fitted.pos, w);
+    shot.look.lerp(fitted.look, w);
+  }
   shot.fov = 38;
 };
 
 // ── Set ─────────────────────────────────────────────────────────────────────
+
+// ── Labels ──────────────────────────────────────────────────────────────────
+
+const labelOps = NODES.map(() => 0);
+const nodeRects = NODES.map(() => ({ l: 0, t: 0, r: 0, b: 0 }));
+/** The set's offset while it rises with the pinned copy (see SystemSet). */
+const lifted = new Vector3();
+
+interface Slot {
+  id: string;
+  h: number;
+  y: number;
+  /** Leader target, or null for no leader. */
+  ax: number | null;
+  ay: number;
+  op: number;
+}
+const slots: Record<"left" | "right", Slot[]> = { left: [], right: [] };
+
+/**
+ * Places the labels in two columns beside the diagram (left blocks on the
+ * left, right blocks on the right), each as close to its block's height as
+ * the column allows: labels keep LABEL_SPACING px apart and stay inside the
+ * frame, so they never touch each other, a block or the caption.
+ */
+function layoutLabels(
+  cam: PerspectiveCamera,
+  vw: number,
+  vh: number,
+  lift: number,
+  platOp: number,
+) {
+  if (!archFrame.columns) {
+    labelEls.forEach((el) => (el.style.opacity = "0"));
+    leaderEls.forEach((el) => (el.style.opacity = "0"));
+    return;
+  }
+  const diag = { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity };
+  NODES.forEach((_, i) => {
+    const r = project(NODE_CORNERS[i]!, cam, vw, vh, nodeRects[i], lifted);
+    diag.l = Math.min(diag.l, r.l);
+    diag.r = Math.max(diag.r, r.r);
+    diag.t = Math.min(diag.t, r.t);
+    diag.b = Math.max(diag.b, r.b);
+  });
+  slots.left.length = 0;
+  slots.right.length = 0;
+  NODES.forEach((n, i) => {
+    const r = nodeRects[i]!;
+    const side = LABEL_SIDE[n.id] ?? "right";
+    const h = labelHeights.get(n.id) ?? 30;
+    const ay = (r.t + r.b) / 2;
+    // Land the leader just inside the block's outer edge.
+    const ax = side === "left" ? r.l + (r.r - r.l) * 0.08 : r.r - (r.r - r.l) * 0.08;
+    slots[side].push({ id: n.id, h, y: ay - h / 2, ax, ay, op: labelOps[i]! });
+  });
+  const ph = labelHeights.get("platform") ?? 30;
+  slots.right.push({ id: "platform", h: ph, y: diag.b - ph, ax: null, ay: 0, op: platOp });
+
+  const top = archFrame.top - lift;
+  const bottom = archFrame.bottom - lift;
+  for (const side of ["left", "right"] as const) {
+    const col = slots[side].sort((a, b) => a.y - b.y);
+    // Push down to clear the label above, then up to stay inside the frame.
+    let y = top;
+    for (const s of col) {
+      s.y = Math.max(s.y, y);
+      y = s.y + s.h + LABEL_SPACING;
+    }
+    y = bottom;
+    for (let k = col.length - 1; k >= 0; k--) {
+      const s = col[k]!;
+      s.y = Math.min(s.y, y - s.h);
+      y = s.y - LABEL_SPACING;
+    }
+    const x = side === "left" ? diag.l - LABEL_GAP : diag.r + LABEL_GAP;
+    for (const s of col) {
+      const el = labelEls.get(s.id);
+      if (el) {
+        el.style.transform =
+          side === "left"
+            ? `translate3d(${x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0) translateX(-100%)`
+            : `translate3d(${x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0)`;
+        el.style.opacity = s.op.toFixed(3);
+      }
+      const line = leaderEls.get(s.id);
+      if (!line) continue;
+      if (s.ax === null || s.op <= 0.001) {
+        line.style.opacity = "0";
+        continue;
+      }
+      const x0 = x + (side === "left" ? 4 : -4);
+      const y0 = s.y + s.h / 2;
+      const dx = s.ax - x0;
+      const dy = s.ay - y0;
+      const len = Math.hypot(dx, dy);
+      line.style.transform = `translate3d(${x0.toFixed(1)}px, ${y0.toFixed(1)}px, 0) rotate(${Math.atan2(dy, dx).toFixed(4)}rad) scaleX(${len.toFixed(1)})`;
+      line.style.opacity = s.op.toFixed(3);
+    }
+  }
+}
 
 const boxGeos = new Map<string, BoxGeometry>();
 const floorGeo = new PlaneGeometry(40, 40).rotateX(-Math.PI / 2);
@@ -441,7 +667,6 @@ export function SystemSet({ tier }: { tier: Tier }) {
     });
   }, []);
 
-  const v = useMemo(() => new Vector3(), []);
   const q0 = useMemo(() => new Quaternion(), []);
   const wasVisible = useRef(false);
 
@@ -449,7 +674,10 @@ export function SystemSet({ tier }: { tier: Tier }) {
     const group = ref.current;
     const visible = !!group?.visible && !director.compiling;
     if (!visible) {
-      if (wasVisible.current) labelEls.forEach((el) => (el.style.opacity = "0"));
+      if (wasVisible.current) {
+        labelEls.forEach((el) => (el.style.opacity = "0"));
+        leaderEls.forEach((el) => (el.style.opacity = "0"));
+      }
       wasVisible.current = false;
       if (!director.compiling) return;
     }
@@ -487,27 +715,33 @@ export function SystemSet({ tier }: { tier: Tier }) {
       mesh.visible = s > 0.001 || director.compiling;
       n.mat.uniforms.uGlow!.value = s;
       n.mat.uniforms.uTime!.value = t;
-
-      const el = labelEls.get(n.def.id);
-      if (!el) return;
-      const op = visible ? smoothstep(0.75, 1, s) : 0;
-      if (op <= 0.001) {
-        el.style.opacity = "0";
-        return;
-      }
-      v.set(n.to.x + n.def.size[0] * 0.5, n.to.y + n.def.size[1] * 0.5 + 0.06, n.to.z).project(cam);
-      const x = (v.x * 0.5 + 0.5) * size.width;
-      const y = (-v.y * 0.5 + 0.5) * size.height;
-      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(6px, -100%)`;
-      el.style.opacity = v.z < 1 ? op.toFixed(3) : "0";
+      labelOps[i] = visible ? smoothstep(0.75, 1, s) : 0;
     });
-
-    const plat = labelEls.get("platform");
-    if (plat) {
-      const op = visible ? smoothstep(0.85, 1, morph) : 0;
-      v.set(3.7, FLOOR_Y, 1.7).project(cam);
-      plat.style.transform = `translate3d(${((v.x * 0.5 + 0.5) * size.width).toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * size.height).toFixed(1)}px, 0) translate(-100%, 8px)`;
-      plat.style.opacity = v.z < 1 ? op.toFixed(3) : "0";
+    // As Act II scrolls away, the whole set rises with the pinned copy, px for
+    // px at the diagram's depth. Applied to the set (not the damped camera) so
+    // the caption and the diagram move exactly together and never cross.
+    const lift = archFrame.ready
+      ? Math.max(0, director.scroll + size.height - archFrame.sectionBottom)
+      : 0;
+    if (group) {
+      if (lift > 0) {
+        const fov = MathUtils.degToRad((cam as PerspectiveCamera).fov);
+        const wpp = (2 * cam.position.length() * Math.tan(fov / 2)) / size.height;
+        lifted
+          .set(0, 1, 0)
+          .applyQuaternion(cam.quaternion)
+          .multiplyScalar(lift * wpp);
+      } else lifted.set(0, 0, 0);
+      group.position.copy(lifted);
+    }
+    if (visible) {
+      layoutLabels(
+        cam as PerspectiveCamera,
+        size.width,
+        size.height,
+        lift,
+        smoothstep(0.85, 1, morph),
+      );
     }
   });
 

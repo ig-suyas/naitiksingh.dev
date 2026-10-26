@@ -13,7 +13,7 @@ npm run build      # production build
 npm start          # serve the build
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
-npm run capture    # re-screenshot the live projects into /public/projects (needs Chrome)
+npm run capture    # re-screenshot the live projects into /public/projects (Playwright + Chrome)
 ```
 
 URL flags for testing: `?2d` forces the 2D fallback and `?3d` forces 3D. In development, `window.__director` and `window.__r3f` are exposed for debugging.
@@ -40,7 +40,7 @@ Copy `.env.example` to `.env.local`.
 
 All copy, links, projects, services, skills, the process, the FAQ and the credits live in **`/content/site.ts`**. Components only read from it.
 
-- **Projects:** edit the `projects` array. Posters live in `/public/projects/<slug>.webp` (1600×1000) with a `<slug>-tex.webp` (1024×640) for the 3D screen. Add a target to `scripts/capture-screens.mjs` and run `npm run capture`.
+- **Projects:** edit the `projects` array. Posters live in `/public/projects/<slug>.webp` (1600×1000) with a `<slug>-tex.webp` (1024×640) for the 3D screen. Add a target to `scripts/capture-screens.mjs` and run `npm run capture -- <slug>`. The first two projects are featured; the rest sit behind "See more work" (`FEATURED` in `components/sections/ProofAct.tsx`). Set `concept: true` for concept work to show the "Concept project" badge.
 - **Skill tiers:** `Core`, `Comfortable` or `Exploring`.
 - **Testimonials:** add real quotes to `testimonials` to replace the "Reserved for your review" placeholder. Set `pressAct.reserved` to `""` to hide the act instead.
 - **Architecture in Act II:** `architecture.nodes` and `architecture.edges` (positions are 3D units).
@@ -54,9 +54,9 @@ All copy, links, projects, services, skills, the process, the FAQ and the credit
 
 ### Lighthouse (mobile, production build, five runs)
 
-| Performance       | Accessibility | Best practices | SEO | FCP   | LCP   | TBT        | CLS   |
-| ----------------- | ------------- | -------------- | --- | ----- | ----- | ---------- | ----- |
-| 88–93 (median 91) | 100           | 100            | 100 | 0.9 s | 2.9 s | 110–290 ms | 0.004 |
+| Performance       | Accessibility | Best practices | SEO | FCP   | LCP   | TBT       | CLS   |
+| ----------------- | ------------- | -------------- | --- | ----- | ----- | --------- | ----- |
+| 92–94 (median 93) | 100           | 100            | 100 | 0.9 s | 3.0 s | 60–110 ms | 0.004 |
 
 LCP is Lighthouse's simulated slow-4G figure; the observed paint is about 0.4 s. The remaining gap to 2.5 s is mostly the Next.js/React baseline plus the two display fonts.
 
@@ -65,7 +65,7 @@ What keeps it fast, so future changes don't undo it:
 - **First-load JS is ~196 KB gzip.** three.js, postprocessing, GSAP, Lenis, motion, the 2D fallback and the contact form are all lazy chunks. GSAP and Lenis load once the page is idle (`lib/idle.ts`), because nothing can scroll until the film leader finishes. Keep new `gsap` imports behind `loadGsap()` / `useGsap()` in `lib/use-gsap.ts`.
 - **Fonts are ~100 KB.** Fraunces (without the opsz axis) is the only font that swaps. JetBrains Mono is `display: optional`, and body text uses the system UI stack. Every swapping web font forces a full-page re-layout on phones.
 - **Rendering:**
-  - Heavy blocks below the fold use `content-visibility: auto` (`.cv`, `.cv-children`).
+  - Heavy blocks below the fold use `content-visibility: auto` (`.cv`, `.cv-children`). Project cards are laid out once in idle time (`Director.tsx`), so scrolling into Act III never pays for a first layout.
   - One-shot reveals are CSS transitions driven by a single IntersectionObserver (`data-reveal`).
   - The letterbox animates with `transform`, never a `:root` variable.
 - **Few running CSS animations.** Each continuously running CSS animation costs a style pass every frame on phones, so the film grain is the only always-on one.

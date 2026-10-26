@@ -9,12 +9,32 @@ import { clamp } from "./math";
 
 export type Tier = "high" | "medium" | "low";
 
-interface Beat {
-  group: string;
+/** A project card in Act III, in document px. */
+interface FeatureBox {
   index: number;
-  el: HTMLElement;
-  center: number;
+  top: number;
+  bottom: number;
 }
+
+/**
+ * One project's own scroll state, recomputed from the scroll position every
+ * frame (so nothing is ever shared or left stale between projects).
+ */
+export interface FeatureState {
+  /** False while the feature is collapsed behind "See more work". */
+  present: boolean;
+  /** 0 → 1 while the card rises from the bottom edge to the hold line (max zoom). */
+  enter: number;
+  /** 0 → 1 once the card is read: the release, until the next card starts to rise. */
+  exit: number;
+}
+
+/** Where a card's top sits at full zoom, as a fraction of the viewport (just under the nav). */
+export const HOLD_LINE = 0.15;
+/** The hold ends when the card's bottom edge rises to this line (its last row is in view). */
+export const RELEASE_LINE = 0.75;
+/** Scroll distance of the release when no card follows, in viewport heights. */
+export const EXIT_SPAN = 0.75;
 
 export interface DirectorState {
   /** Continuous act time: index of the act + progress through it. */
@@ -28,8 +48,8 @@ export interface DirectorState {
   vh: number;
   /** Pointer in -1..1, y up. */
   pointer: { x: number; y: number };
-  /** Continuous index per beat group, e.g. beats.work = 0.4 between project 0 and 1. */
-  beats: Record<string, number>;
+  /** Act III projects, by feature index. */
+  features: FeatureState[];
   /** Nearest act boundary (k = index of the act being entered) and signed distance in viewport heights. */
   boundary: { k: number; d: number };
   reducedMotion: boolean;
@@ -47,7 +67,7 @@ type Listener = (s: DirectorState) => void;
 const listeners = new Set<Listener>();
 let sectionTops: number[] = [];
 let sectionHeights: number[] = [];
-let beats: Beat[] = [];
+let featureBoxes: FeatureBox[] = [];
 let lastScroll = 0;
 let scrollMax = 1;
 /** Set when layout was re-measured or something non-scroll changed; forces a notify. */
@@ -63,7 +83,7 @@ export const director: DirectorState = {
   vw: 1280,
   vh: 800,
   pointer: { x: 0, y: 0 },
-  beats: {},
+  features: [],
   boundary: { k: 1, d: -10 },
   reducedMotion: false,
   tier: "high",
@@ -102,11 +122,17 @@ export function measure() {
     sectionHeights.push(h);
     cursor = top + h;
   }
-  beats = Array.from(document.querySelectorAll<HTMLElement>("[data-beat]")).map((el) => {
-    const [group = "", index = "0"] = (el.dataset.beat ?? "").split(":");
-    const r = el.getBoundingClientRect();
-    return { group, index: Number(index), el, center: r.top + sy + r.height / 2 };
-  });
+  // Features inside collapsed (inert) content don't exist until it is expanded.
+  const cards = document.querySelectorAll<HTMLElement>("[data-feature]:not([inert] *)");
+  // Each marker is the card's grid (see ProofAct), exactly as tall as the card.
+  // Reading the grid rather than the card never forces a layout of
+  // content-visibility skipped content.
+  featureBoxes = Array.from(cards)
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      return { index: Number(el.dataset.feature), top: r.top + sy, bottom: r.bottom + sy };
+    })
+    .sort((a, b) => a.index - b.index);
 }
 
 /** Called once per frame by the ticker in <Director/>. */
@@ -165,27 +191,20 @@ export function update(time: number) {
   director.boundary.k = bestK;
   director.boundary.d = bestD;
 
-  // Beats: continuous index per group.
-  const groups: Record<string, Beat[]> = {};
-  for (const b of beats) (groups[b.group] ??= []).push(b);
-  for (const g in groups) {
-    const list = groups[g]!.sort((a, b) => a.index - b.index);
-    let v = 0;
-    const first = list[0]!;
-    const last = list[list.length - 1]!;
-    if (ref <= first.center) v = clamp((ref - first.center) / vh, -1, 0);
-    else if (ref >= last.center) v = list.length - 1 + clamp((ref - last.center) / vh, 0, 1);
-    else {
-      for (let i = 0; i < list.length - 1; i++) {
-        const a = list[i]!;
-        const b = list[i + 1]!;
-        if (ref >= a.center && ref < b.center) {
-          v = i + (ref - a.center) / (b.center - a.center);
-          break;
-        }
-      }
-    }
-    director.beats[g] = v;
+  // Features: each card's own entry and release progress, clamped to 0..1.
+  // The release runs until the next present card starts to rise, so one
+  // project's state never overlaps the next one's.
+  for (const f of director.features) f.present = false;
+  for (let k = 0; k < featureBoxes.length; k++) {
+    const b = featureBoxes[k]!;
+    const next = featureBoxes[k + 1];
+    const f = (director.features[b.index] ??= { present: false, enter: 0, exit: 0 });
+    f.present = true;
+    f.enter = clamp((vh - (b.top - scroll)) / (vh * (1 - HOLD_LINE)));
+    const max = b.top - vh * HOLD_LINE;
+    const end = next ? next.top - vh : b.bottom - vh * RELEASE_LINE + vh * EXIT_SPAN;
+    const release = Math.max(max, Math.min(b.bottom - vh * RELEASE_LINE, end - vh * 0.3));
+    f.exit = clamp((scroll - release) / Math.max(1, end - release));
   }
 
   // Nothing moved: skip the listeners entirely (most frames while idle).

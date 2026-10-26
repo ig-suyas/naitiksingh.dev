@@ -49,6 +49,21 @@ export function Director() {
       });
     }
 
+    // A heavy block's first render builds its whole layout (10–90 ms at 4× CPU;
+    // the first one also warms text caches). Render each content-visibility
+    // block for one frame in its own idle slot, so the browser also records its
+    // real size (the `auto` in contain-intrinsic-size): scrolling then only
+    // re-paints, and nothing changes size. They stay skipped while offscreen.
+    void whenIdle(4).then(async () => {
+      for (const el of document.querySelectorAll<HTMLElement>(".cv, .cv-children > *")) {
+        if (!alive) return;
+        el.style.contentVisibility = "visible";
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        el.style.contentVisibility = "";
+        await whenIdle(1);
+      }
+    });
+
     let raf = 0;
     const remeasure = () => {
       cancelAnimationFrame(raf);

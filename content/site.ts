@@ -45,6 +45,8 @@ export interface Project {
   /** 1024×640 texture for the 3D screen. */
   texture: string;
   posterAlt: string;
+  /** Concept work for a fictional business: shows a "Concept project" badge. */
+  concept?: boolean;
   note?: string;
   /** Accent used for the poster glow; keep it within the film palette. */
   tint: string;
@@ -152,7 +154,6 @@ export const buildAct = {
   title: "The Build",
   heading: "Then the system comes together.",
   body: "I design the system first, then build every layer of it: the interface, the APIs, the data and the pipeline that ships it.",
-  close: "Clean boundaries. Typed contracts. Tested paths. Deployed on every push.",
 };
 
 /**
@@ -231,12 +232,90 @@ export const proofAct = {
   slate: "Act III",
   title: "The Proof",
   heading: "Selected work.",
-  sub: "Two features, both live. Each one built, deployed and maintained solo.",
+  sub: "Four features, all live. Each one built, deployed and maintained solo.",
 };
 
 // ── Projects ─────────────────────────────────────────────────────────────────
 
 export const projects: Project[] = [
+  {
+    slug: "saltline",
+    title: "Saltline Kitchen",
+    logline: "A Brooklyn seafood group with three rooms, told one plate at a time.",
+    genre: "Hand-made illustration, real restaurant logic",
+    year: "2026",
+    role: "Solo (design and front-end)",
+    problem:
+      "A seafood group with three very different locations needs one site that sells the food, books the right room and still feels handmade.",
+    solution:
+      "A scroll-driven “plate leaves the pass” sequence built from hand-coded cut-paper SVG, a reservation flow that knows each room, and a table-ordering demo.",
+    outcomes: [
+      "The cut-paper illustrations are hand-coded SVG, so they stay crisp at any size and animate on scroll.",
+      "Reservations respect per-room party limits, so guests are only offered a room that fits their group.",
+      "A front-end QR table-ordering demo: scan, build a tray and review it, with the tray held in local state.",
+    ],
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Motion", "Vercel"],
+    live: "https://saltline-kitchen-woad.vercel.app/",
+    repos: [],
+    poster: "/projects/saltline.webp",
+    texture: "/projects/saltline-tex.webp",
+    posterAlt:
+      "Saltline Kitchen home page: the headline “Brooklyn seafood, cooked over live fire.” beside a cut-paper illustration of oysters on a plate with lemon slices and grilled bread.",
+    concept: true,
+    tint: "#5EC8D0",
+  },
+  {
+    slug: "vantro",
+    title: "Vantro",
+    logline: "AI revenue forecasting for B2B sales teams, with the range shown up front.",
+    genre: "Data-heavy product, plain-spoken story",
+    year: "2026",
+    role: "Solo (design and front-end)",
+    problem:
+      "A forecasting product lives or dies on trust. Sales leaders need to see how the number is built before they believe it.",
+    solution:
+      "A multi-page marketing site that leads with the product: a forecast card in the hero, then a four-step story of how the forecast is made.",
+    outcomes: [
+      "The hero forecast card plays out a sample quarter: deals land, get scored and roll up into a projection with its range.",
+      "A four-step product story (connect, score, roll up, act) explains the model without the jargon.",
+      "A multi-page marketing site (product, pricing and about) that shares one visual system.",
+    ],
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Motion", "Vercel"],
+    live: "https://vantro-gamma.vercel.app/",
+    repos: [],
+    poster: "/projects/vantro.webp",
+    texture: "/projects/vantro-tex.webp",
+    posterAlt:
+      "Vantro home page: the headline “Call the quarter with a number you can defend.” beside a Q4 forecast card projecting $4.82M on a chart of scored deals.",
+    concept: true,
+    tint: "#E8A84B",
+  },
+  {
+    slug: "maren",
+    title: "Maren Aesthetics",
+    logline: "A premium med spa in Scottsdale that sells calm instead of hype.",
+    genre: "Quiet luxury, honest promises",
+    year: "2026",
+    role: "Solo (design and front-end)",
+    problem:
+      "Med spa sites tend to shout: airbrushed results and hard sells. That is exactly what makes careful clients hesitate.",
+    solution:
+      "A quiet, editorial site with an illustrated treatments list, a results page that sets honest expectations and a booking flow taken one step at a time.",
+    outcomes: [
+      "Hovering a treatment swaps the illustration beside the list, so every service gets a visual without a wall of photos.",
+      "An honest results page that explains what to expect, rather than promising a transformation.",
+      "A multi-step booking flow that asks for one thing at a time.",
+    ],
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Motion", "Vercel"],
+    live: "https://maren-aesthetics.vercel.app/",
+    repos: [],
+    poster: "/projects/maren.webp",
+    texture: "/projects/maren-tex.webp",
+    posterAlt:
+      "Maren Aesthetics home page: an arched desert-sunset illustration above the word “Maren”, with the headline “Quiet, physician-led aesthetics for a rested, natural look.”",
+    concept: true,
+    tint: "#FFD08A",
+  },
   {
     slug: "shadeon",
     title: "Shadeon",
@@ -273,47 +352,6 @@ export const projects: Project[] = [
     posterAlt:
       "Shadeon home page: a swirling particle shader above the headline “Animated shaders, ready to paste.”",
     tint: "#E8A84B",
-  },
-  {
-    slug: "haul",
-    title: "Haul",
-    logline: "A multi-vendor marketplace: independent makers, one checkout.",
-    genre: "Complex commerce, simple experience",
-    year: "2026",
-    role: "Solo. API, security and data model written by hand, without AI assistance, as a backend fundamentals workout.",
-    problem:
-      "A marketplace serves three audiences at once: shoppers who want one cart, sellers who manage stock and orders, and admins who keep the whole thing honest.",
-    solution:
-      "A Spring Boot API with stateless auth and role-based access for customers, sellers and admins, backed by a relational model for catalog, carts and orders.",
-    outcomes: [
-      "JWT sessions with Google Sign-In, and role-based routes for shoppers, sellers and admins.",
-      "Orders follow a clear lifecycle (pending, processing, shipped, delivered) that sellers and admins drive.",
-      "An AI shopping assistant grounded in the live catalog, protected by a per-user sliding-window rate limiter.",
-    ],
-    stack: [
-      "Java 21",
-      "Spring Boot 4",
-      "Spring Security",
-      "Spring Data JPA",
-      "PostgreSQL",
-      "JWT",
-      "Google OAuth",
-      "Docker",
-      "Render",
-      "React",
-      "Vite",
-    ],
-    live: "https://xzie-store-frontend.vercel.app/",
-    repos: [
-      { label: "Backend", href: "https://github.com/ig-suyas/xzie-store-backend" },
-      { label: "Frontend", href: "https://github.com/ig-suyas/xzie-store-frontend" },
-    ],
-    poster: "/projects/haul.webp",
-    texture: "/projects/haul-tex.webp",
-    posterAlt:
-      "Haul storefront: the headline “Everyday goods. Delivered with care.” beside product photos of headphones, a lamp and a coffee dripper.",
-    note: "The demo API runs on a free tier, so the first visit can take about 30 seconds to wake up.",
-    tint: "#5EC8D0",
   },
 ];
 

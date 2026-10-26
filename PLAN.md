@@ -11,14 +11,14 @@ The site is a film about the client's own product being built, and scrolling pla
 
 ## Facts gathered from the live projects
 
-| | Shadeon | Haul |
-|---|---|---|
-| What | Library of original animated WebGL shaders: tune live, copy as React / JS / GLSL, or install through the shadcn registry | Multi-vendor marketplace: "independent makers, one checkout" |
-| Stack | Next.js 16, React 19, TypeScript, WebGL/GLSL, Tailwind v4, Neon Postgres + Drizzle, Zod, Vitest, Playwright, Vercel | Java 21, Spring Boot 4, Spring Security, Spring Data JPA, PostgreSQL, JWT (jjwt), Google Sign-In, Bean Validation, Gemini assistant, Docker, Render; React + Vite on Vercel |
-| Proof points | 1 WebGL context draws the whole gallery, pauses off-screen, adaptive resolution, reduced motion, static fallback, zero-dependency exports, feedback buffers (fog/ink trails) | Customer / seller / admin roles, cart, order lifecycle PENDING to DELIVERED, admin role management, image upload, AI assistant grounded in the catalog with a per-user sliding-window rate limiter |
-| Repos | github.com/ig-suyas/Shadeon | github.com/ig-suyas/xzie-store-backend, /xzie-store-frontend |
+| | Saltline Kitchen | Vantro | Maren Aesthetics | Shadeon |
+|---|---|---|---|---|
+| What | Concept: Brooklyn seafood group, 3 locations | Concept: AI revenue forecasting for B2B sales teams | Concept: premium med spa in Scottsdale | Library of original animated WebGL shaders: tune live, copy as React / JS / GLSL, or install through the shadcn registry |
+| Stack | Next.js, React, TypeScript, Tailwind CSS, Motion, Vercel | Next.js, React, TypeScript, Tailwind CSS, Motion, Vercel | Next.js, React, TypeScript, Tailwind CSS, Motion, Vercel | Next.js 16, React 19, TypeScript, WebGL/GLSL, Tailwind v4, Neon Postgres + Drizzle, Zod, Vitest, Playwright, Vercel |
+| Proof points | Scroll-driven cut-paper SVG sequence, reservations with per-room party limits, QR table-ordering demo | Forecast hero card, four-step product story, multi-page marketing site | Hover-driven illustration swap, honest results page, multi-step booking | 1 WebGL context draws the whole gallery, pauses off-screen, adaptive resolution, reduced motion, static fallback, zero-dependency exports, feedback buffers (fog/ink trails) |
+| Repos | none public | none public | none public | github.com/ig-suyas/Shadeon |
 
-Naitik wrote the Haul backend and database by hand, without AI, as a fundamentals exercise. That is framed as craftsmanship.
+The first three are concept projects for fictional businesses and are labelled that way on the site. Features 03 and 04 sit behind a "See more work" toggle.
 
 ## Acts
 

@@ -143,9 +143,60 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* Keeps the stack legible where a label sits over the floor grid. */
+  text-shadow:
+    0 0 6px rgb(0 0 0 / 0.9),
+    0 0 2px rgb(0 0 0 / 0.8);
+  max-width: 168px; /* labelCol() in components/canvas/registry.ts */
   padding-left: 10px;
   border-left: 1px solid rgb(232 168 75 / 0.7);
   white-space: nowrap;
+}
+.node-label > span + span {
+  white-space: normal;
+}
+/* Left column: right-aligned, the tick on the side facing the diagram. */
+.node-label[data-side="left"] {
+  align-items: flex-end;
+  text-align: right;
+  padding-left: 0;
+  padding-right: 10px;
+  border-left: 0;
+  border-right: 1px solid rgb(232 168 75 / 0.7);
+}
+/* From xl up the labels grow 30% with the diagram (labelCol() in registry.ts). */
+@media (min-width: 1280px) {
+  .node-label {
+    gap: 3px;
+    max-width: 196px;
+    padding-left: 13px;
+  }
+  .node-label[data-side="left"] {
+    max-width: 180px;
+    padding-left: 0;
+    padding-right: 13px;
+  }
+  .node-label .mono-label {
+    font-size: 0.91rem;
+  }
+  .node-label > span + span {
+    font-size: 0.86rem;
+  }
+}
+.node-label-platform {
+  border-left-color: rgb(94 200 208 / 0.6);
+}
+/* Thin leader from a label to its block: a 1px line drawn with transforms only. */
+.node-leader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  background: rgb(232 168 75 / 0.45);
+  transform-origin: 0 50%;
+  will-change: transform, opacity;
 }
 
 /* ── Film layers ──────────────────────────────────────────────────────────── */
@@ -853,11 +904,10 @@ html.has-reticle textarea {
   }
 }
 
-/* Phones: keep the architecture legible, label only the main tiers. */
+/* Phones: the labels become a plain list under the diagram (BuildAct). */
 @media (max-width: 639px) {
-  .node-label[data-node="auth"],
-  .node-label[data-node="catalog"],
-  .node-label[data-node="queue"] {
+  .node-label,
+  .node-leader {
     display: none;
   }
 }
@@ -878,6 +928,33 @@ html.js-reveal [data-reveal="x"] {
 html.js-reveal [data-reveal].is-in {
   opacity: 1;
   transform: none;
+}
+
+/* ── "See more work" disclosure (see MoreWork) ──────────────────────────────── */
+
+/* Animating the row from 0fr to 1fr gives a smooth height without measuring.
+   Kept within 0.5 s: the page below moves while it runs, and shifts that
+   finish inside the click's input window don't count towards CLS. */
+.more-work {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.5s var(--ease-film),
+    opacity 0.45s var(--ease-film);
+}
+.more-work[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.more-work > div {
+  min-height: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .more-work {
+    transition: none;
+  }
 }
 
 /* ── Rendering budget ─────────────────────────────────────────────────────── */

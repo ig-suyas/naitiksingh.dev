@@ -3,6 +3,11 @@ import { projects, proofAct, type Project } from "@/content/site";
 import { delay } from "@/lib/reveal";
 import { Slate } from "@/components/ui/Slate";
 import { Magnetic } from "@/components/ui/Magnetic";
+import { MoreWork } from "./MoreWork";
+
+/** Features shown up front; the rest sit behind "See more work". */
+const FEATURED = 2;
+const pad = (n: number) => String(n).padStart(2, "0");
 
 function Arrow() {
   return (
@@ -13,15 +18,21 @@ function Arrow() {
 }
 
 function Feature({ project: p, index }: { project: Project; index: number }) {
+  const total = projects.length;
   const right = index % 2 === 0;
 
   return (
-    <article
-      data-beat={`work:${index}`}
-      aria-labelledby={`feature-${p.slug}`}
-      className="relative flex min-h-[150vh] items-center py-[18vh]"
-    >
-      <div className="cv mx-auto grid w-full max-w-[1500px] px-5 sm:px-10 lg:grid-cols-12">
+    // On desktop each card gets a viewport of air above and below it: the 3D
+    // screenshot zooms in while the card rises, holds while it scrolls through
+    // and hands off to the next one in that gap (see ScreeningSet).
+    <article aria-labelledby={`feature-${p.slug}`} className="relative py-[18vh] lg:py-[50vh]">
+      {/* `data-feature` sits on the grid, outside the content-visibility skip, so
+          the director measures the card without forcing a layout: the grid is
+          exactly as tall as the card. */}
+      <div
+        data-feature={index}
+        className="cv mx-auto grid w-full max-w-[1500px] px-5 [--cis:1300px] sm:px-10 lg:grid-cols-12"
+      >
         <div className={`lg:col-span-5 ${right ? "lg:col-start-8" : "lg:col-start-1"}`}>
           <div className="panel overflow-hidden rounded-2xl">
             {/* Poster still, framed like a strip of film. */}
@@ -31,25 +42,34 @@ function Feature({ project: p, index }: { project: Project; index: number }) {
                 <Image
                   src={p.poster}
                   alt={p.posterAlt}
-                  fill
+                  width={1600}
+                  height={1000}
+                  loading={index === 0 ? "eager" : "lazy"}
                   sizes="(min-width: 1024px) 40vw, 100vw"
-                  className="object-cover object-top opacity-90"
+                  className="h-full w-full object-cover object-top opacity-90"
                 />
                 <div
                   className="from-ink/70 absolute inset-0 bg-gradient-to-t via-transparent to-transparent"
                   aria-hidden="true"
                 />
                 <p className="mono-label text-paper/90 absolute bottom-3 left-4">
-                  Feature 0{index + 1} · {p.year}
+                  Feature {pad(index + 1)}/{pad(total)} · {p.year}
                 </p>
               </div>
               <div className="perforations h-3 opacity-70" aria-hidden="true" />
             </div>
 
             <div className="p-6 sm:p-8">
-              <p data-reveal style={{ ...delay(0), color: p.tint }} className="mono-label">
-                Now screening
-              </p>
+              <div data-reveal style={delay(0)} className="flex flex-wrap items-center gap-3">
+                <p style={{ color: p.tint }} className="mono-label">
+                  Now screening
+                </p>
+                {p.concept && (
+                  <p className="mono-label border-paper/15 text-dim rounded-full border px-2.5 py-1">
+                    Concept project
+                  </p>
+                )}
+              </div>
               <h3
                 id={`feature-${p.slug}`}
                 data-reveal
@@ -121,7 +141,7 @@ function Feature({ project: p, index }: { project: Project; index: number }) {
                     className="mono-label bg-paper text-ink hover:bg-amber flex h-11 items-center gap-2 rounded-full px-5 transition-colors"
                   >
                     View live site <Arrow />
-                    <span className="sr-only"> (opens {p.title} in a new tab)</span>
+                    <span className="sr-only"> (opens in a new tab)</span>
                   </a>
                 </Magnetic>
                 {p.repos.map((r) => (
@@ -167,10 +187,18 @@ export function ProofAct() {
           <p className="text-shadow-film text-paper/85 mt-6 max-w-[44ch] text-lg">{proofAct.sub}</p>
         </div>
       </header>
-      {projects.map((p, i) => (
+      {projects.slice(0, FEATURED).map((p, i) => (
         <Feature key={p.slug} project={p} index={i} />
       ))}
-      <div className="h-[35vh]" aria-hidden="true" />
+      {projects.length > FEATURED && (
+        <MoreWork range={`${pad(FEATURED + 1)}–${pad(projects.length)}`}>
+          {projects.slice(FEATURED).map((p, i) => (
+            <Feature key={p.slug} project={p} index={FEATURED + i} />
+          ))}
+        </MoreWork>
+      )}
+      {/* Desktop: room for the last screenshot to release before Act IV's iris opens. */}
+      <div className="h-[35vh] lg:h-[110vh]" aria-hidden="true" />
     </section>
   );
 }

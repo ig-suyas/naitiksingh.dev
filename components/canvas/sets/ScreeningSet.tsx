@@ -14,6 +14,7 @@ import {
   TextureLoader,
   Vector2,
   Vector3,
+  type Group,
   type Texture,
 } from "three";
 import { projects } from "@/content/site";
@@ -28,10 +29,11 @@ const SW = 4.4;
 const SH = 2.75;
 const PROJECTOR = new Vector3(0, 3.6, 12);
 
-const screenPos = (i: number) => new Vector3(i % 2 === 0 ? -2.5 : 2.5, 0.75, -i * 3.8);
-const screenRot = (i: number) => (i % 2 === 0 ? 0.3 : -0.3);
-const SCREENS = projects.map((_, i) => ({ pos: screenPos(i), rotY: screenRot(i) }));
-const BEAMS: BeamInfo[] = SCREENS.slice(0, 2).map((s) => ({
+const slot = (i: number) => i % 2; // 01 and 03 on the left, 02 and 04 deeper on the right
+const screenPos = (k: number) => new Vector3(k === 0 ? -2.5 : 2.5, 0.75, -k * 3.8);
+const screenRot = (k: number) => (k === 0 ? 0.3 : -0.3);
+const SLOTS = [0, 1].map((k) => ({ pos: screenPos(k), rotY: screenRot(k) }));
+const BEAMS: BeamInfo[] = SLOTS.map((s) => ({
   origin: PROJECTOR,
   target: s.pos,
   radius: 2.3,
@@ -39,48 +41,94 @@ const BEAMS: BeamInfo[] = SCREENS.slice(0, 2).map((s) => ({
 
 // ── Camera ──────────────────────────────────────────────────────────────────
 
-const A = { pos: new Vector3(), look: new Vector3() };
-const B = { pos: new Vector3(), look: new Vector3() };
+interface Pose {
+  pos: Vector3;
+  look: Vector3;
+}
+const pose = (): Pose => ({ pos: new Vector3(), look: new Vector3() });
+const A = pose();
+const B = pose();
+const W = pose();
+const F = pose();
 
-function focus(i: number, portrait: boolean, fit: number, out: { pos: Vector3; look: Vector3 }) {
-  const s = SCREENS[clamp(i, 0, SCREENS.length - 1)]!;
-  if (portrait) {
-    out.pos.set(s.pos.x * 0.6, s.pos.y - 0.2, s.pos.z + 7.5 * fit);
-    out.look.set(s.pos.x * 0.85, s.pos.y - 1.25, s.pos.z);
-    return;
-  }
+/** Full zoom on a slot: the screen fills the half of the frame beside its card. */
+function focus(k: number, fit: number, out: Pose) {
+  const s = SLOTS[k]!;
   // Text panel sits on the opposite side: push the screen into its half of the frame.
-  // Screen center ~13° off-axis, filling the free half of the frame.
   const side = s.pos.x < 0 ? 1 : -1;
   out.pos.set(s.pos.x + side * 2.1, s.pos.y + 0.2, s.pos.z + 9.1 * fit);
   out.look.set(s.pos.x + side * 2.1, s.pos.y - 0.05, s.pos.z);
 }
 
-function wide(out: { pos: Vector3; look: Vector3 }, fit: number) {
+/** The whole room from the back rows. */
+function wide(out: Pose, fit: number) {
   out.pos.set(0, 1.5, 10.5 * fit);
   out.look.set(0, 0.35, -2.5);
 }
 
+/** Where the camera starts before zooming in on a slot: far back in the room. */
+function far(k: number, fit: number, out: Pose) {
+  wide(out, fit);
+  if (k === 0) return;
+  focus(k, fit, F);
+  out.pos.lerp(F.pos, 0.15);
+  out.look.lerp(F.look, 0.15);
+}
+
+function mix(a: Pose, b: Pose, t: number, out: Shot) {
+  out.pos.lerpVectors(a.pos, b.pos, t);
+  out.look.lerpVectors(a.look, b.look, t);
+}
+
+/**
+ * Which project owns the camera: the last present one whose card has started
+ * to rise (or the first, before any has), and the present one after it.
+ */
+function lineup() {
+  let cur = -1;
+  let next = -1;
+  const fs = director.features;
+  for (let i = 0; i < fs.length; i++) {
+    const f = fs[i];
+    if (!f?.present) continue;
+    if (cur < 0 || f.enter > 0) {
+      cur = i;
+      next = -1;
+    } else if (next < 0) next = i;
+  }
+  return { cur, next };
+}
+
+/** Below lg the card spans the width with its poster on top: no pinned zoom, no screens. */
+const stacked = () => director.vw < 1024;
+
+/** Brightness of a screen that isn't playing: dim enough to read as background behind a card. */
+const PEEK_ON = 0.18;
+
+const ease = (t: number, rm: boolean) => (rm ? (t >= 0.5 ? 1 : 0) : easeInOutCubic(t));
+
 const rig: RigFn = (_t, shot: Shot, aspect, rm) => {
   const portrait = aspect < 1;
   const fit = portrait ? 1.25 : aspect < 1.35 ? 1.15 : 1;
-  let b = clamp(director.beats.work ?? -1, -1, SCREENS.length - 1);
-  if (rm) b = Math.max(0, Math.round(b));
-  if (b < 0) {
-    wide(A, fit);
-    focus(0, portrait, fit, B);
-    const e = easeInOutCubic(b + 1);
-    shot.pos.lerpVectors(A.pos, B.pos, e);
-    shot.look.lerpVectors(A.look, B.look, e);
-  } else {
-    const i = Math.floor(b);
-    focus(i, portrait, fit, A);
-    focus(i + 1, portrait, fit, B);
-    const e = easeInOutCubic(b - i);
-    shot.pos.lerpVectors(A.pos, B.pos, e);
-    shot.look.lerpVectors(A.look, B.look, e);
-  }
   shot.fov = portrait ? 50 : 38;
+  const { cur, next } = lineup();
+  const f = director.features[cur];
+  if (!f || stacked()) {
+    wide(W, fit);
+    mix(W, W, 0, shot);
+    return;
+  }
+  if (next >= 0 && f.exit > 0) {
+    // Handoff: back out of this screen towards the next one's starting point.
+    focus(slot(cur), fit, A);
+    far(slot(next), fit, B);
+    mix(A, B, ease(f.exit, rm), shot);
+  } else {
+    // Entry: from the back of the room in to full zoom, then hold there.
+    far(slot(cur), fit, A);
+    focus(slot(cur), fit, B);
+    mix(A, B, ease(f.enter, rm), shot);
+  }
 };
 
 // ── Materials ───────────────────────────────────────────────────────────────
@@ -90,6 +138,7 @@ function screenMaterial(map: Texture, tint: string) {
     uniforms: {
       uMap: { value: map },
       uOn: { value: 0.3 },
+      uAlpha: { value: 1 },
       uTime: { value: 0 },
       uTint: { value: new Color(tint) },
     },
@@ -103,6 +152,7 @@ function screenMaterial(map: Texture, tint: string) {
     fragmentShader: /* glsl */ `
       uniform sampler2D uMap;
       uniform float uOn;
+      uniform float uAlpha;
       uniform float uTime;
       uniform vec3 uTint;
       varying vec2 vUv;
@@ -115,9 +165,10 @@ function screenMaterial(map: Texture, tint: string) {
         float vig = smoothstep(0.95, 0.3, length((uv - 0.5) * vec2(1.0, 1.25)));
         vec3 col = tex * scan * flicker * mix(0.45, 1.0, vig) * 0.82;
         col = mix(col * 0.12 + uTint * 0.01, col, uOn);
-        gl_FragColor = vec4(col, 1.0);
+        gl_FragColor = vec4(col, uAlpha);
       }
     `,
+    transparent: true,
   });
 }
 
@@ -125,6 +176,7 @@ function frameMaterial(tint: string) {
   return new ShaderMaterial({
     uniforms: {
       uOn: { value: 0.3 },
+      uAlpha: { value: 1 },
       uSize: { value: new Vector2(SW + 0.16, SH + 0.16) },
       uColor: { value: new Color(tint) },
     },
@@ -137,6 +189,7 @@ function frameMaterial(tint: string) {
     `,
     fragmentShader: /* glsl */ `
       uniform float uOn;
+      uniform float uAlpha;
       uniform vec2 uSize;
       uniform vec3 uColor;
       varying vec2 vUv;
@@ -145,9 +198,10 @@ function frameMaterial(tint: string) {
         float d = min(px.x, px.y);
         float line = 1.0 - smoothstep(0.0, 0.018, abs(d - 0.03));
         vec3 col = vec3(0.012) + uColor * line * (0.4 + uOn * 1.6);
-        gl_FragColor = vec4(col, 1.0);
+        gl_FragColor = vec4(col, uAlpha);
       }
     `,
+    transparent: true,
   });
 }
 
@@ -229,7 +283,6 @@ export function ScreeningSet({ tier }: { tier: Tier }) {
           screen: screenMaterial(tex, p.tint),
           frame: frameMaterial(p.tint),
           glow: glowMaterial(p.tint),
-          ...SCREENS[i]!,
         };
       }),
     [textures],
@@ -273,28 +326,65 @@ export function ScreeningSet({ tier }: { tier: Tier }) {
     mesh.computeBoundingSphere();
   }, [seatLayout]);
 
+  const groupRefs = useRef<(Group | null)[]>([]);
+
   useFrame((state) => {
     if (!ref.current?.visible) return;
-    const t = director.reducedMotion ? 3 : state.clock.elapsedTime;
-    const b = director.beats.work ?? -1;
+    const rm = director.reducedMotion;
+    const t = rm ? 3 : state.clock.elapsedTime;
     beamMat.uniforms.uTime!.value = t;
+    const { cur, next } = lineup();
+    const fc = director.features[cur];
+    const enter = fc ? (rm ? ease(fc.enter, true) : fc.enter) : 0;
+    const exit = fc && next >= 0 ? (rm ? ease(fc.exit, true) : fc.exit) : 0;
+    let lit = 0;
     screens.forEach((s, i) => {
-      const on = Math.max(0.28, 1 - smoothstep(0.55, 1.15, Math.abs(b - i)));
+      const g = groupRefs.current[i];
+      if (!g) return;
+      // Only the project on stage and the one after it are drawn. The next one
+      // peeks in the background from the deeper slot, or fades in during the
+      // handoff; every other screen (left behind, collapsed) is hidden.
+      let alpha = 0;
+      let on = PEEK_ON;
+      // A next screen in the front slot would sit right beside the camera while
+      // it backs out, so that handoff fades one screen out before the other in.
+      const peek = next >= 0 && slot(next) > slot(cur);
+      if (i === cur) {
+        alpha =
+          next < 0 ? 1 : peek ? 1 - smoothstep(0.55, 1, exit) : 1 - smoothstep(0.3, 0.65, exit);
+        on = lerp(PEEK_ON, 1, smoothstep(0, 0.7, enter)) * (1 - 0.8 * smoothstep(0, 0.6, exit));
+      } else if (i === next) {
+        alpha = peek ? 1 : smoothstep(0.7, 1, exit);
+      }
+      if (director.compiling) alpha = 1;
+      g.visible = alpha > 0.001 && !stacked();
+      if (!g.visible && !director.compiling) return;
       s.screen.uniforms.uOn!.value = on;
+      s.screen.uniforms.uAlpha!.value = alpha;
       s.screen.uniforms.uTime!.value = t + i * 3.1;
       s.frame.uniforms.uOn!.value = on;
-      s.glow.uniforms.uOn!.value = on;
+      s.frame.uniforms.uAlpha!.value = alpha;
+      s.glow.uniforms.uOn!.value = on * alpha;
+      if (i === cur) lit = on * alpha;
     });
-    seatMat.uniforms.uIntensity!.value = lerp(0.6, 1, clamp(b + 1));
+    seatMat.uniforms.uIntensity!.value = lerp(0.6, 1, clamp(lit));
   });
 
   return (
     <group ref={ref} userData={{ set: true }}>
       {screens.map((s, i) => (
-        <group key={projects[i]!.slug} position={s.pos} rotation={[0, s.rotY, 0]}>
+        <group
+          key={projects[i]!.slug}
+          ref={(g) => {
+            groupRefs.current[i] = g;
+          }}
+          position={SLOTS[slot(i)]!.pos}
+          rotation={[0, SLOTS[slot(i)]!.rotY, 0]}
+          visible={false}
+        >
           <mesh geometry={glowGeo} material={s.glow} position={[0, 0, -0.2]} renderOrder={3} />
-          <mesh geometry={frameGeo} material={s.frame} position={[0, 0, -0.01]} />
-          <mesh geometry={screenGeo} material={s.screen} />
+          <mesh geometry={frameGeo} material={s.frame} position={[0, 0, -0.01]} renderOrder={4} />
+          <mesh geometry={screenGeo} material={s.screen} renderOrder={5} />
         </group>
       ))}
       {BEAMS.map((b, i) => (
