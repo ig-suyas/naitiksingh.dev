@@ -232,7 +232,7 @@ export const proofAct = {
   slate: "Act III",
   title: "The Proof",
   heading: "Selected work.",
-  sub: "Four features, all live. Each one built, deployed and maintained solo.",
+  sub: "Five features, all live. Each one built, deployed and maintained solo.",
 };
 
 // ── Projects ─────────────────────────────────────────────────────────────────
@@ -265,28 +265,37 @@ export const projects: Project[] = [
     tint: "#5EC8D0",
   },
   {
-    slug: "vantro",
-    title: "Vantro",
-    logline: "AI revenue forecasting for B2B sales teams, with the range shown up front.",
-    genre: "Data-heavy product, plain-spoken story",
+    slug: "oscillo",
+    title: "Oscillo",
+    logline: "A launch site for a fictional desktop analog synthesizer, played by scrolling.",
+    genre: "Flagship scroll experience, hands-on 3D",
     year: "2026",
     role: "Solo (design and front-end)",
     problem:
-      "A forecasting product lives or dies on trust. Sales leaders need to see how the number is built before they believe it.",
+      "A hardware launch has to make people want an instrument they can't touch yet, and a spec sheet alone won't do it.",
     solution:
-      "A multi-page marketing site that leads with the product: a forecast card in the hero, then a four-step story of how the forecast is made.",
+      "A flagship scroll-driven site: a 3D synth in the hero, a waveform ribbon that runs through every scene, a pinned process scene and a waitlist form.",
     outcomes: [
-      "The hero forecast card plays out a sample quarter: deals land, get scored and roll up into a projection with its range.",
-      "A four-step product story (connect, score, roll up, act) explains the model without the jargon.",
-      "A multi-page marketing site (product, pricing and about) that shares one visual system.",
+      "A real-time 3D model of the synth renders in the hero with Three.js, so the product is the first thing visitors see.",
+      "One waveform ribbon threads through every scene, tying the whole scroll together as a single piece.",
+      "A pinned, scroll-driven process scene built with GSAP, ending in a front-end waitlist form.",
     ],
-    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Motion", "Vercel"],
-    live: "https://vantro-gamma.vercel.app/",
+    stack: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "GSAP",
+      "Three.js",
+      "Motion",
+      "Vercel",
+    ],
+    live: "https://oscillo-osc1.vercel.app/",
     repos: [],
-    poster: "/projects/vantro.webp",
-    texture: "/projects/vantro-tex.webp",
+    poster: "/projects/oscillo.webp",
+    texture: "/projects/oscillo-tex.webp",
     posterAlt:
-      "Vantro home page: the headline “Call the quarter with a number you can defend.” beside a Q4 forecast card projecting $4.82M on a chart of scored deals.",
+      "Oscillo home page: the word “OSCILLO” in huge letters above a 3D desktop synthesizer with orange keys, wrapped by a glowing orange waveform ribbon.",
     concept: true,
     tint: "#E8A84B",
   },
@@ -315,6 +324,32 @@ export const projects: Project[] = [
       "Maren Aesthetics home page: an arched desert-sunset illustration above the word “Maren”, with the headline “Quiet, physician-led aesthetics for a rested, natural look.”",
     concept: true,
     tint: "#FFD08A",
+  },
+  {
+    slug: "vantro",
+    title: "Vantro",
+    logline: "AI revenue forecasting for B2B sales teams, with the range shown up front.",
+    genre: "Data-heavy product, plain-spoken story",
+    year: "2026",
+    role: "Solo (design and front-end)",
+    problem:
+      "A forecasting product lives or dies on trust. Sales leaders need to see how the number is built before they believe it.",
+    solution:
+      "A multi-page marketing site that leads with the product: a forecast card in the hero, then a four-step story of how the forecast is made.",
+    outcomes: [
+      "The hero forecast card plays out a sample quarter: deals land, get scored and roll up into a projection with its range.",
+      "A four-step product story (connect, score, roll up, act) explains the model without the jargon.",
+      "A multi-page marketing site (product, pricing and about) that shares one visual system.",
+    ],
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Motion", "Vercel"],
+    live: "https://vantro-gamma.vercel.app/",
+    repos: [],
+    poster: "/projects/vantro.webp",
+    texture: "/projects/vantro-tex.webp",
+    posterAlt:
+      "Vantro home page: the headline “Call the quarter with a number you can defend.” beside a Q4 forecast card projecting $4.82M on a chart of scored deals.",
+    concept: true,
+    tint: "#E8A84B",
   },
   {
     slug: "shadeon",

@@ -29,7 +29,7 @@ const SW = 4.4;
 const SH = 2.75;
 const PROJECTOR = new Vector3(0, 3.6, 12);
 
-const slot = (i: number) => i % 2; // 01 and 03 on the left, 02 and 04 deeper on the right
+const slot = (i: number) => i % 2; // 01, 03 and 05 on the left, 02 and 04 deeper on the right
 const screenPos = (k: number) => new Vector3(k === 0 ? -2.5 : 2.5, 0.75, -k * 3.8);
 const screenRot = (k: number) => (k === 0 ? 0.3 : -0.3);
 const SLOTS = [0, 1].map((k) => ({ pos: screenPos(k), rotY: screenRot(k) }));

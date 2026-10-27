@@ -120,7 +120,7 @@ async function shoot(name, y) {
   return { lit, cards: s.cards };
 }
 
-const slugs = ["saltline", "vantro", "maren", "shadeon"];
+const slugs = ["saltline", "oscillo", "maren", "vantro", "shadeon"];
 const maxBoxes = [];
 
 /** The project's own screen at full zoom: whole, in view and clear of its card. */

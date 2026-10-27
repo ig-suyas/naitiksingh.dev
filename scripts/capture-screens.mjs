@@ -23,6 +23,8 @@ const cacheDir = join(root, "scripts", ".cache");
 
 const targets = [
   { slug: "saltline", url: "https://saltline-kitchen-woad.vercel.app/" },
+  // Software WebGL so the 3D synth renders headless; skips the loader if it can.
+  { slug: "oscillo", url: "https://oscillo-osc1.vercel.app/", swiftshader: true, skip: true },
   { slug: "vantro", url: "https://vantro-gamma.vercel.app/" },
   { slug: "maren", url: "https://maren-aesthetics.vercel.app/" },
   // Real GPU renders the WebGL hero faithfully.
@@ -40,13 +42,21 @@ for (const t of queue) {
   const browser = await chromium.launch({
     channel: process.env.CHROME_PATH ? undefined : "chrome",
     executablePath: process.env.CHROME_PATH,
-    args: t.gpu ? ["--enable-gpu", "--ignore-gpu-blocklist"] : [],
+    args: t.gpu
+      ? ["--enable-gpu", "--ignore-gpu-blocklist"]
+      : t.swiftshader
+        ? ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+        : [],
   });
   const page = await browser.newPage({
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 2,
   });
   await page.goto(t.url, { waitUntil: "networkidle", timeout: 90_000 });
+  if (t.skip) {
+    const skip = page.getByRole("button", { name: /skip/i }).first();
+    await skip.click({ timeout: 8000 }).catch(() => {});
+  }
   await page.addStyleTag({
     content: "html{scrollbar-width:none}::-webkit-scrollbar{display:none}",
   });

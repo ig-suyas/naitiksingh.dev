@@ -39,7 +39,7 @@ export function MoreWork({ range, children }: { range: string; children: ReactNo
       return;
     }
     // Expand in place: nothing above the button moves, and scrolling simply
-    // carries on from 02 into 03 and 04 (no programmatic jump).
+    // carries on from 02 into 03, 04 and 05 (no programmatic jump).
     setOpen(true);
   };
 
