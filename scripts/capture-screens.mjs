@@ -22,6 +22,7 @@ const outDir = join(root, "public", "projects");
 const cacheDir = join(root, "scripts", ".cache");
 
 const targets = [
+  { slug: "klinth", url: "https://klinth.pages.dev/" },
   { slug: "saltline", url: "https://saltline-kitchen-woad.vercel.app/" },
   // Software WebGL so the 3D synth renders headless; skips the loader if it can.
   { slug: "oscillo", url: "https://oscillo-osc1.vercel.app/", swiftshader: true, skip: true },

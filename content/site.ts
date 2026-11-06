@@ -232,12 +232,48 @@ export const proofAct = {
   slate: "Act III",
   title: "The Proof",
   heading: "Selected work.",
-  sub: "Five features, all live. Each one built, deployed and maintained solo.",
+  sub: "Six features, all live. Each one built, deployed and maintained solo.",
 };
 
 // ── Projects ─────────────────────────────────────────────────────────────────
 
 export const projects: Project[] = [
+  {
+    slug: "klinth",
+    title: "Klinth",
+    logline: "A free website builder for people who don't code, with no badge and no login.",
+    genre: "Real product, no strings attached",
+    year: "2026",
+    role: "Solo: product, design, engineering, security and launch",
+    problem:
+      "Free website builders come with a catch: an account to sign up for, a badge on every page and a site you can't take with you.",
+    solution:
+      "A visual editor in the browser: start from a template, place things freely, add animations, embeds and custom code, then export clean HTML, CSS and JS as a ZIP or push it straight to GitHub.",
+    outcomes: [
+      "An optional AI helper runs on the user's own Gemini key, which the server never stores or logs; in the browser it stays encrypted behind a passphrase.",
+      "Custom code runs in a sandboxed frame with no same-origin access, and the design prompt behind the AI stays private on the server.",
+      "Projects autosave to IndexedDB and are validated with Zod; the API Worker is rate limited per IP, all on Cloudflare's free plan.",
+    ],
+    stack: [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS",
+      "Motion",
+      "Zod",
+      "IndexedDB",
+      "Cloudflare Pages",
+      "Cloudflare Workers",
+    ],
+    live: "https://klinth.pages.dev",
+    repos: [{ label: "Source", href: "https://github.com/ig-suyas/klinth" }],
+    // [CONFIRM] PLACEHOLDER images: replace with real captures (`npm run capture -- klinth`).
+    poster: "/projects/klinth.webp",
+    texture: "/projects/klinth-tex.webp",
+    // [CONFIRM] rewrite to describe the real poster once it is captured.
+    posterAlt: "Klinth website builder (placeholder poster).",
+    tint: "#FFD08A",
+  },
   {
     slug: "saltline",
     title: "Saltline Kitchen",
