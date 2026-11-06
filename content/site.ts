@@ -267,11 +267,10 @@ export const projects: Project[] = [
     ],
     live: "https://klinth.pages.dev",
     repos: [{ label: "Source", href: "https://github.com/ig-suyas/klinth" }],
-    // [CONFIRM] PLACEHOLDER images: replace with real captures (`npm run capture -- klinth`).
     poster: "/projects/klinth.webp",
     texture: "/projects/klinth-tex.webp",
-    // [CONFIRM] rewrite to describe the real poster once it is captured.
-    posterAlt: "Klinth website builder (placeholder poster).",
+    posterAlt:
+      "Klinth start screen: the headline “Make a website you are proud of.” above two starting designs, a personal portfolio and a small business page.",
     tint: "#FFD08A",
   },
   {
