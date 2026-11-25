@@ -4,6 +4,7 @@ import { delay } from "@/lib/reveal";
 import { Slate } from "@/components/ui/Slate";
 import { Magnetic } from "@/components/ui/Magnetic";
 import { MoreWork } from "./MoreWork";
+import { OpenSource } from "./OpenSource";
 
 /** Features shown up front; the rest sit behind "See more work". */
 const FEATURED = 2;
@@ -197,6 +198,7 @@ export function ProofAct() {
           ))}
         </MoreWork>
       )}
+      <OpenSource />
       {/* Desktop: room for the last screenshot to release before Act IV's iris opens. */}
       <div className="h-[35vh] lg:h-[110vh]" aria-hidden="true" />
     </section>

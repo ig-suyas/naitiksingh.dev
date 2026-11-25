@@ -235,6 +235,51 @@ export const proofAct = {
   sub: "Six features, all live. Each one built, deployed and maintained solo.",
 };
 
+/** Thin strip at the end of Act III: merged upstream contributions. */
+export const openSource = {
+  label: "Behind the scenes",
+  kicker: "Open source",
+  heading: "Merged into projects you may already use.",
+  items: [
+    {
+      name: "Keycloak",
+      lang: "Java",
+      about: "CNCF identity and access management project started by Red Hat.",
+      fix: "Fixed a realm import failure on organization-specific admin permissions.",
+      prs: [{ number: 55223, href: "https://github.com/keycloak/keycloak/pull/55223" }],
+    },
+    {
+      name: "Micronaut Data",
+      lang: "Java",
+      about: "Oracle-supported Micronaut Foundation project.",
+      fix: "Fixed a startup failure when a JDBC data source and an R2DBC connection factory share a name.",
+      prs: [
+        {
+          number: 4276,
+          href: "https://github.com/micronaut-projects/micronaut-data/pull/4276",
+        },
+      ],
+    },
+    {
+      name: "Kroxylicious",
+      lang: "Java",
+      about: "Apache Kafka proxy started by Red Hat.",
+      fix: "Two refactors that extract resolvers out of KafkaProxyInitializer.",
+      prs: [
+        { number: 5319, href: "https://github.com/kroxylicious/kroxylicious/pull/5319" },
+        { number: 5354, href: "https://github.com/kroxylicious/kroxylicious/pull/5354" },
+      ],
+    },
+    {
+      name: "Medusa",
+      lang: "TypeScript",
+      about: "Venture-backed commerce platform.",
+      fix: "Fixed a duplicate heading on two admin pages.",
+      prs: [{ number: 53, href: "https://github.com/medusajs/b2b-starter/pull/53" }],
+    },
+  ],
+} as const;
+
 // ── Projects ─────────────────────────────────────────────────────────────────
 
 export const projects: Project[] = [
