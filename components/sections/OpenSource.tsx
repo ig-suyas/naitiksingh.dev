@@ -23,13 +23,11 @@ function Arrow() {
  */
 export function OpenSource() {
   return (
-    <section
-      aria-labelledby="oss-heading"
-      className="relative z-10 mx-auto w-full max-w-[1500px] px-5 sm:px-10"
-    >
-      {/* Denser than the shared panel: this strip spans the screens behind it. */}
+    <section aria-labelledby="oss-heading" className="relative z-10 w-full px-5 sm:px-0">
+      {/* Denser than the shared panel: this strip spans the screens behind it.
+          From tablet up it takes 92% of the viewport, capped at 1400px. */}
       <div
-        className="panel mx-auto max-w-[1080px] rounded-2xl px-5 py-6 sm:px-7 sm:py-5"
+        className="panel mx-auto rounded-2xl px-5 py-6 sm:w-[92vw] sm:max-w-[1400px] sm:px-7 sm:py-5"
         style={{ background: "linear-gradient(180deg, rgb(11 11 17 / 0.93), rgb(6 6 10 / 0.95))" }}
       >
         <div data-reveal style={delay(0)}>

@@ -176,19 +176,25 @@ function Feature({ project: p, index }: { project: Project; index: number }) {
 export function ProofAct() {
   return (
     <section id="work" data-act aria-labelledby="work-heading" className="relative">
-      <header className="mx-auto flex min-h-[95vh] w-full max-w-[1500px] items-center px-5 sm:px-10">
-        <div className="max-w-2xl">
-          <Slate act={proofAct.slate} scene="03" title={proofAct.title} />
-          <h2
-            id="work-heading"
-            className="text-shadow-film font-display mt-8 text-[clamp(3rem,8vw,7.5rem)] leading-[0.95] font-light tracking-tight"
-          >
-            {proofAct.heading}
-          </h2>
-          <p className="text-shadow-film text-paper/85 mt-6 max-w-[44ch] text-lg">{proofAct.sub}</p>
-        </div>
-      </header>
-      <OpenSource />
+      {/* Opening frame: the act title and the open source strip are centred together,
+          so the strip sits just under "Selected work" instead of a screen below it. */}
+      <div className="flex min-h-[95vh] flex-col justify-center gap-[clamp(2rem,5vh,3.5rem)] pt-[calc(max(var(--nav-h),var(--lb-max))+1rem)] pb-[calc(var(--nav-h)+1rem)]">
+        <header className="mx-auto w-full max-w-[1500px] px-5 sm:px-10">
+          <div className="max-w-2xl">
+            <Slate act={proofAct.slate} scene="03" title={proofAct.title} />
+            <h2
+              id="work-heading"
+              className="text-shadow-film font-display mt-8 text-[clamp(3rem,8vw,7.5rem)] leading-[0.95] font-light tracking-tight"
+            >
+              {proofAct.heading}
+            </h2>
+            <p className="text-shadow-film text-paper/85 mt-6 max-w-[44ch] text-lg">
+              {proofAct.sub}
+            </p>
+          </div>
+        </header>
+        <OpenSource />
+      </div>
       {projects.slice(0, FEATURED).map((p, i) => (
         <Feature key={p.slug} project={p} index={i} />
       ))}

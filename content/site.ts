@@ -270,13 +270,6 @@ export const openSource = {
         { number: 5354, href: "https://github.com/kroxylicious/kroxylicious/pull/5354" },
       ],
     },
-    {
-      name: "Medusa",
-      lang: "TypeScript",
-      about: "Venture-backed commerce platform.",
-      fix: "Fixed a duplicate heading on two admin pages.",
-      prs: [{ number: 53, href: "https://github.com/medusajs/b2b-starter/pull/53" }],
-    },
   ],
 } as const;
 
