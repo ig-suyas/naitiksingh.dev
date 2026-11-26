@@ -19,3 +19,6 @@ next-env.d.ts
 
 # local tooling
 /.claude
+
+# private handoff notes
+/naitik-final-cut-handoff.md

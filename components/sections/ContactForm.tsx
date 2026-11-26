@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type ClipboardEvent, type DragEvent, type FormEvent } from "react";
 import { AnimatePresence, LazyMotion, m } from "motion/react";
 import { loadMotionFeatures } from "@/lib/load-motion";
 import { budgets, contactAct, person, projectTypes, timelines } from "@/content/site";
@@ -14,6 +14,21 @@ import { Magnetic } from "@/components/ui/Magnetic";
 
 type Status = "idle" | "submitting" | "success" | "error" | "fallback";
 type Errors = ContactErrors;
+
+/**
+ * Files dropped or pasted into "Project details" ride along silently as email
+ * attachments. The API route re-checks everything; these limits mirror it.
+ */
+const FILE_EXTS = ["md", "txt", "pdf", "html"];
+const MAX_FILES = 3;
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
+const FILE_ERROR =
+  "Attachments must be up to 3 .md, .txt, .pdf or .html files, 4 MB in total. They were removed, so drop them in again.";
+const hasFiles = (dt: DataTransfer) => Array.from(dt.types).includes("Files");
+const allowedFile = (f: File) => {
+  const dot = f.name.lastIndexOf(".");
+  return dot > 0 && FILE_EXTS.includes(f.name.slice(dot + 1).toLowerCase());
+};
 
 function mailtoHref(data: Record<string, string>) {
   const subject = `Project brief: ${data.projectType || "new project"}${data.name ? ` (${data.name})` : ""}`;
@@ -72,6 +87,37 @@ export function ContactForm() {
   const [sentTo, setSentTo] = useState("");
   /** Offer the mailto escape hatch only when the problem is on the server side. */
   const [offerMail, setOfferMail] = useState(false);
+  /** Attachments kept for the next submit. A ref, so nothing re-renders or shows. */
+  const filesRef = useRef<File[]>([]);
+
+  /** Keeps allowed file types, skipping exact repeats. Others are ignored. */
+  function keepFiles(list: FileList) {
+    const key = (f: File) => `${f.name}:${f.size}:${f.lastModified}`;
+    const seen = new Set(filesRef.current.map(key));
+    for (const f of Array.from(list).filter(allowedFile)) {
+      if (seen.has(key(f))) continue;
+      seen.add(key(f));
+      filesRef.current.push(f);
+    }
+  }
+
+  // Stop the browser from opening a dropped file; keep it with the brief instead.
+  function onFileDragOver(e: DragEvent<HTMLTextAreaElement>) {
+    if (!hasFiles(e.dataTransfer)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }
+  function onFileDrop(e: DragEvent<HTMLTextAreaElement>) {
+    if (!hasFiles(e.dataTransfer)) return;
+    e.preventDefault();
+    keepFiles(e.dataTransfer.files);
+  }
+  function onFilePaste(e: ClipboardEvent<HTMLTextAreaElement>) {
+    if (!e.clipboardData.files.length) return;
+    keepFiles(e.clipboardData.files);
+    // Pasted text still lands as usual; a file-only paste inserts nothing.
+    if (!e.clipboardData.getData("text/plain")) e.preventDefault();
+  }
 
   const aria = (id: ContactField) => ({
     id: `f-${id}`,
@@ -88,6 +134,11 @@ export function ContactForm() {
     setOfferMail(false);
 
     const next: Errors = validateContact(raw);
+    const files = filesRef.current;
+    if (files.length > MAX_FILES || files.reduce((n, f) => n + f.size, 0) > MAX_FILE_BYTES) {
+      filesRef.current = [];
+      next.message = FILE_ERROR;
+    }
     if (Object.keys(next).length) {
       setErrors(next);
       setStatus("error");
@@ -101,17 +152,28 @@ export function ContactForm() {
     setStatus("submitting");
     setMessage("Sending your brief…");
     try {
-      const res = await fetch("/api/contact", {
+      let init: RequestInit = {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(raw),
-      });
+      };
+      if (files.length) {
+        // With attachments: multipart, so files aren't inflated by base64.
+        const fd = new FormData();
+        for (const [k, v] of Object.entries(raw)) fd.append(k, v);
+        for (const f of files) fd.append("files", f, f.name);
+        init = { method: "POST", body: fd };
+      }
+      const res = await fetch("/api/contact", init);
       const body = (await res.json().catch(() => ({}))) as {
         fallback?: string;
         errors?: Errors;
         retryAfter?: number;
+        attachments?: string;
       };
+      if (body.attachments === "rejected") filesRef.current = [];
       if (res.ok) {
+        filesRef.current = [];
         setSentTo(raw.email?.trim() ?? "");
         setStatus("success");
         setMessage("Brief received.");
@@ -267,6 +329,9 @@ export function ContactForm() {
                   rows={5}
                   required
                   maxLength={4000}
+                  onDragOver={onFileDragOver}
+                  onDrop={onFileDrop}
+                  onPaste={onFilePaste}
                 />
               </Field>
 
