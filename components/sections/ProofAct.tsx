@@ -188,6 +188,7 @@ export function ProofAct() {
           <p className="text-shadow-film text-paper/85 mt-6 max-w-[44ch] text-lg">{proofAct.sub}</p>
         </div>
       </header>
+      <OpenSource />
       {projects.slice(0, FEATURED).map((p, i) => (
         <Feature key={p.slug} project={p} index={i} />
       ))}
@@ -198,7 +199,6 @@ export function ProofAct() {
           ))}
         </MoreWork>
       )}
-      <OpenSource />
       {/* Desktop: room for the last screenshot to release before Act IV's iris opens. */}
       <div className="h-[35vh] lg:h-[110vh]" aria-hidden="true" />
     </section>

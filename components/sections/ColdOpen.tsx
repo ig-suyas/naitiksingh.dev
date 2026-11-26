@@ -29,7 +29,12 @@ export function ColdOpen() {
 
   return (
     <section id="title" data-act aria-labelledby="title-heading" className="relative h-[175vh]">
-      <div className="sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden px-5 text-center">
+      {/* The scroll cue sits in the flow under the title, so they can never collide:
+          the spacer above the cue keeps at least --cue-gap between them. The top
+          padding mirrors the cue zone (less --lift), so the title stays centred,
+          a touch high, until a short screen needs it to rise further. */}
+      <div className="sticky top-0 flex h-svh flex-col items-center overflow-hidden px-5 pt-[calc(var(--lb-max)+var(--cue-b)+var(--cue-h)-var(--lift))] pb-[calc(var(--lb-max)+var(--cue-b))] text-center [--cue-b:clamp(1.5rem,4vh,3.25rem)] [--cue-gap:clamp(2.5rem,7vh,3.5rem)] [--cue-h:5.25rem] [--lift:1.25rem]">
+        <div className="flex-1" aria-hidden="true" />
         <div data-push className="will-change-transform">
           <div className="title-card flex flex-col items-center">
             <p className="mono-label text-muted">{coldOpen.presents}</p>
@@ -45,19 +50,14 @@ export function ColdOpen() {
               <span className="bg-amber size-1 rounded-full" />
               <span className="bg-amber/60 h-px w-10 sm:w-16" />
             </div>
-            <p className="text-shadow-film text-paper/90 mt-6 max-w-[46ch] text-lg sm:text-xl">
-              {person.subtitle}
-            </p>
-            <p className="text-shadow-film font-display text-amber mt-3 max-w-[36ch] text-lg italic sm:text-2xl">
+            <p className="text-shadow-film font-display text-amber mt-3.5 max-w-[36ch] text-lg italic sm:text-2xl">
               {person.tagline}
             </p>
           </div>
         </div>
+        <div className="min-h-[var(--cue-gap)] flex-1" aria-hidden="true" />
 
-        <div
-          data-cue
-          className="absolute bottom-[calc(var(--lb-max)+3.25rem)] flex flex-col items-center gap-3"
-        >
+        <div data-cue className="flex flex-col items-center gap-3">
           <span className="mono-label text-muted">{coldOpen.scrollCue}</span>
           <span className="scroll-cue-line" aria-hidden="true" />
         </div>

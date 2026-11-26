@@ -476,7 +476,7 @@ export const crewAct = {
   slate: "Act IV",
   title: "Services",
   heading: "Services & pricing.",
-  sub: "Three fixed-price ways to work together.",
+  sub: "Five fixed-price ways to work together.",
 };
 
 export const services: Service[] = [
@@ -489,12 +489,28 @@ export const services: Service[] = [
     deliverables: ["API & auth review", "Query tuning", "Security check", "Prioritized fix plan"],
   },
   {
-    title: "MVP backend: marketplace / SaaS API",
+    title: "Frontend and interactive sites",
+    price: "Starting at $2,000",
+    terms: "2–3 weeks",
+    pitch:
+      "A fast, polished interface in React or Next.js, from a clean product UI to a cinematic 3D / WebGL site.",
+    deliverables: ["Responsive UI", "Motion & scroll", "3D / WebGL", "Performance"],
+  },
+  {
+    title: "MVP",
     price: "Starting at $6,000",
     terms: "4–6 weeks · billed in milestones (30/30/40)",
     pitch:
-      "A Spring Boot API you can launch on: accounts, roles, payments and a clean data model, deployed.",
+      "A launch-ready first version of your product: accounts, roles, payments and a clean data model, deployed.",
     deliverables: ["Auth & roles", "Payments", "Postgres data model", "Deployed & documented"],
+  },
+  {
+    title: "Full-stack project",
+    price: "Starting at $10,000",
+    terms: "6–8 weeks · billed in milestones (30/30/40)",
+    pitch:
+      "Backend API and frontend built together, from data model to deployed product, with one person owning both sides.",
+    deliverables: ["API + UI", "Auth & payments", "CI & deploy", "Handover docs"],
   },
   {
     title: "Monthly retainer: maintenance and features",
@@ -504,10 +520,6 @@ export const services: Service[] = [
     deliverables: ["Bug fixes", "Dependency upgrades", "New features", "Monitoring"],
   },
 ];
-
-/** One line under the offers: the 3D work, as a side skill. */
-export const servicesNote =
-  "Also available: interactive 3D and WebGL sites, like the shader work in Shadeon.";
 
 export const skillsIntro = {
   title: "Skills",
@@ -697,9 +709,10 @@ export const contactAct = {
 
 export const projectTypes = [
   "Backend audit + fix plan",
-  "MVP backend: marketplace / SaaS API",
+  "MVP",
   "Monthly retainer",
   "Interactive 3D / WebGL site",
+  "Full-stack project",
   "Something else",
 ] as const;
 

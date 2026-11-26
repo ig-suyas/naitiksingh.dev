@@ -17,8 +17,9 @@ function Arrow() {
 }
 
 /**
- * End of Act III: a compact list of merged upstream pull requests. Kept to a
- * single panel so it reads as a footnote to the features, not a fourth one.
+ * Opens Act III, right under "Selected work": a compact list of merged upstream
+ * pull requests. Kept to a single panel so it reads as a preface to the
+ * features, not another one.
  */
 export function OpenSource() {
   return (
@@ -28,7 +29,7 @@ export function OpenSource() {
     >
       {/* Denser than the shared panel: this strip spans the screens behind it. */}
       <div
-        className="panel rounded-2xl px-5 py-6 sm:px-8 sm:py-7"
+        className="panel mx-auto max-w-[1080px] rounded-2xl px-5 py-6 sm:px-7 sm:py-5"
         style={{ background: "linear-gradient(180deg, rgb(11 11 17 / 0.93), rgb(6 6 10 / 0.95))" }}
       >
         <div data-reveal style={delay(0)}>
@@ -39,31 +40,29 @@ export function OpenSource() {
           </p>
           <h3
             id="oss-heading"
-            className="font-display mt-3 text-[clamp(1.5rem,2.6vw,2.1rem)] leading-[1.1] font-light tracking-tight text-balance"
+            className="font-display mt-3 text-[clamp(1.5rem,2vw,1.65rem)] leading-[1.1] font-light tracking-tight text-balance"
           >
             {openSource.heading}
           </h3>
         </div>
 
-        <ul className="border-paper/10 mt-5 border-t">
+        <ul className="border-paper/10 mt-5 border-t sm:mt-4">
           {openSource.items.map((item, i) => (
             <li
               key={item.name}
               data-reveal
               style={delay(80 + i * 60)}
-              className="border-paper/10 grid gap-x-8 gap-y-2 border-b py-3.5 last:border-b-0 last:pb-0 sm:gap-y-3 sm:py-4 lg:grid-cols-12 lg:items-center"
+              className="border-paper/10 grid gap-x-8 gap-y-2 border-b py-3.5 last:border-b-0 last:pb-0 sm:gap-y-3 sm:py-3 lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_17rem] lg:items-center"
             >
-              <div className="lg:col-span-4">
+              <div>
                 <p className="flex flex-wrap items-baseline gap-x-3">
                   <span className="font-display text-paper text-lg leading-tight">{item.name}</span>
                   <span className="mono-label text-muted text-[0.64rem]">{item.lang}</span>
                 </p>
                 <p className="text-dim mt-1 text-sm leading-snug text-pretty">{item.about}</p>
               </div>
-              <p className="text-paper/85 text-[0.95rem] leading-relaxed text-pretty lg:col-span-5">
-                {item.fix}
-              </p>
-              <div className="flex flex-wrap gap-2 lg:col-span-3 lg:justify-end">
+              <p className="text-paper/85 text-[0.95rem] leading-relaxed text-pretty">{item.fix}</p>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
                 {item.prs.map((pr) => (
                   <a
                     key={pr.href}
@@ -71,7 +70,7 @@ export function OpenSource() {
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor="Code"
-                    className="group mono-label border-paper/20 text-paper/85 hover:border-paper/50 hover:text-paper flex h-11 items-center gap-2 rounded-full border px-4 whitespace-nowrap transition-colors"
+                    className="group mono-label border-paper/20 text-paper/85 hover:border-paper/50 hover:text-paper flex h-11 w-[8.25rem] shrink-0 items-center justify-center gap-2 rounded-full border px-3 whitespace-nowrap transition-colors"
                   >
                     PR #{pr.number} <Arrow />
                     <span className="sr-only"> for {item.name} on GitHub (opens in a new tab)</span>

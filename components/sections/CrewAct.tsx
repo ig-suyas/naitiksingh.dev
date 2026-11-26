@@ -7,7 +7,6 @@ import {
   schedule,
   scheduleIntro,
   services,
-  servicesNote,
   skills,
   skillsIntro,
   type Tier,
@@ -92,7 +91,7 @@ export function CrewAct() {
                   </div>
                   <p className="text-paper/80 lg:col-span-4 lg:pt-1.5">{s.pitch}</p>
                   <ul
-                    className="flex flex-wrap gap-1.5 lg:col-span-3 lg:pt-1"
+                    className="flex flex-wrap content-start items-start gap-1.5 self-start lg:col-span-3 lg:pt-1"
                     aria-label="Includes"
                   >
                     {s.deliverables.map((d) => (
@@ -104,9 +103,6 @@ export function CrewAct() {
                 </li>
               ))}
             </ol>
-            <p data-reveal className="text-paper/70 mt-8">
-              {servicesNote}
-            </p>
           </div>
         </div>
 
